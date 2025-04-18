@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef struct {
+    char nom[30];
+    int degats;
+} Attaque;
+
+typedef struct {
+    char nom[20];
+    int vie;
+    Attaque attaques[2];
+} Personnage;
+
+// Fonction pour effectuer une attaque
+void utiliserAttaque(Personnage *attaquant, Personnage *cible, Attaque a) {
+    printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
+    cible->vie -= a.degats;
+    if (cible->vie < 0) cible->vie = 0;
+}
+
+// Fonction pour afficher la vie actuelle des deux personnages
+void afficherVie(Personnage p1, Personnage p2) {
+    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
+    printf("%s : %d PV\t\t%s : %d PV\n\n", p1.nom, p1.vie, p2.nom, p2.vie);
+}
+
+int main() {
+    srand(time(NULL)); // pour que l'ennemi attaque aléatoirement
+
+    Personnage joueur = {
+        "Héros",
+        100,
+        {
+            {"Éclair magique", 20},
+            {"Coup d'épée", 15}
+        }
+    };
+
+    Personnage ennemi = {
+        "Monstre",
+        80,
+        {
+            {"Morsure", 10},
+            {"Coup de griffe", 18}
+        }
+    };
+
+    int choix;
+
+    while (joueur.vie > 0 && ennemi.vie > 0) {
+        afficherVie(joueur, ennemi);
+
+        // Tour du joueur
+        printf("== Ton tour ==\n");
+        for (int i = 0; i < 2; i++) {
+            printf("%d - %s (dégâts : %d)\n", i+1, joueur.attaques[i].nom, joueur.attaques[i].degats);
+        }
+
+        printf("Choisis une attaque : ");
+        scanf("%d", &choix);
+
+        if (choix >= 1 && choix <= 2) {
+            utiliserAttaque(&joueur, &ennemi, joueur.attaques[choix - 1]);
+        } else {
+            printf("Choix invalide, tu perds ton tour !\n");
+        }
+
+        if (ennemi.vie <= 0) break;
+
+        // Tour de l'ennemi
+        printf("\n== Tour de l'ennemi ==\n");
+        int attaqueEnnemi = rand() % 2;
+        utiliserAttaque(&ennemi, &joueur, ennemi.attaques[attaqueEnnemi]);
+    }
+
+    // Fin du combat
+    afficherVie(joueur, ennemi);
+
+    if (joueur.vie > 0)
+        printf("🎉 Victoire ! Le %s a vaincu le %s !\n", joueur.nom, ennemi.nom);
+    else
+        printf("💀 Défaite ! Le %s a été vaincu...\n", joueur.nom);
+
+    return 0;
+}
