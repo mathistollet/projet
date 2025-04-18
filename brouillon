@@ -1,0 +1,112 @@
+// Online C compiler to run C program online
+#include <stdio.h>
+
+#include <stdio.h>
+#include <string.h>
+
+typedef enum{
+tank,assassin,soutien
+}Type;
+
+typedef struct {
+    char nom[30];
+    int degats;
+} Attaque;
+
+
+typedef struct {
+    char nom[50];
+    int pvc;
+     int pvm;
+    int defense;
+    float agl;
+    float vitess;
+    Attaque att[2];
+    Type type;
+} Champion;
+
+const char* lesroles(Type type) {
+    switch (type) {
+        case 0: return "tank";
+        case 1: return "assassin";
+        case 2: return "soutien";
+        default: return "inconnu";
+    }
+}
+
+void afficherVie(Champion p1, Champion p2) {
+    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
+    printf("%s : %d PV\t\t%s : %d PV\n\n", p1.nom, p1.pvc, p2.nom, p2.pvc);
+}
+
+
+void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
+    printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
+    cible->pvc= a.degats;
+    if (cible->pvc < 0) cible->pvc= 0;
+}
+
+
+
+
+
+void combat(Champion* perso1,Champion *perso2 ){
+// Tour du joueur
+        int choix;
+        printf("== Ton tour ==\n");
+        for (int i = 0; i < 2; i++) {
+            printf("%d - %s (dégâts : %d)\n", i+1, perso1->att[i].nom, perso1->att[i].degats);
+        }
+
+        printf("Choisis une attaque : ");
+        scanf("%d", &choix);
+
+        if (choix >= 1 && choix <= 2) {
+            utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+        } else {
+            printf("Choix invalide, tu perds ton tour !\n");
+        }
+
+        if (perso2->pvc <= 0) return;
+
+        // Tour de l'ennemi
+        printf("\n== Tour de l'ennemi ==\n");
+       for (int i = 0; i < 2; i++) {
+            printf("%d - %s (dégâts : %d)\n", i+1, perso2->att[i].nom, perso2->att[i].degats);
+        }
+
+        printf("Choisis une attaque : ");
+        scanf("%d", &choix);
+
+        if (choix >= 1 && choix <= 2) {
+            utiliserAttaque(perso2, perso1, perso2->att[choix - 1]);
+        } else {
+            printf("Choix invalide, tu perds ton tour !\n");
+        }
+
+        if (perso1->pvc <= 0) return;
+}
+
+
+
+
+
+
+int main() {
+ 
+Champion a={"haters", 350, 350, 200, 0.1, 6, { {"Coup de poing", 10},{"Lame magique", 25}},0};
+Champion b={"manu", 300, 300, 200, 0.2, 6,{{"lunette", 50},{"boucle", 30}},1};
+//combat(Champion a, Champion b)
+
+//printf("combatant:%s, attaque avec %s de %d degats", lesroles(b.type),b.att[0].nom,b.att[0].degat);
+
+
+
+while (a.pvc > 0 && b.pvc > 0) {
+    afficherVie(a,b);
+    combat(&a,&b);
+};
+afficherVie(a,b);
+
+    return 0;
+}
