@@ -1,0 +1,5 @@
+dacam 100 100 50 0.6 1.5 assassin tchokeur 50 carotte 20 
+ perso2 120 120 40 0.4 1.5 assassin att1 50 att2 30
+ 
+ 
+ 
