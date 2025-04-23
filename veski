@@ -1,0 +1,137 @@
+
+ #include <stdio.h>
+ #include <string.h>
+ #include<stdlib.h>
+ #include<time.h>
+ 
+ typedef enum {
+     tank, assassin, soutien
+ } Type;
+ 
+ typedef struct {
+     char nom[30];
+     int degats;
+ } Attaque;
+ 
+ typedef struct {
+     char nom[50];
+     int pvc;
+     int pvm;
+     int def;
+     float agl;
+     float vitess;
+     Attaque att[2];
+     Type type;
+ } Champion;
+ 
+ const char* lesroles(Type type) {
+     switch (type) {
+         case 0: return "tank";
+         case 1: return "assassin";
+         case 2: return "soutien";
+         default: return "inconnu";
+     }
+ }
+ 
+ void afficherVie(Champion p1, Champion p2) {
+     printf("\n--- ÉTAT DES COMBATTANTS ---\n");
+     printf("%s : %d PV\t\t%s : %d PV\n\n", p1.nom, p1.pvc, p2.nom, p2.pvc);
+ }
+ int esquive(int chance){
+     if(rand()%101>chance){
+         return 1;
+     }
+     else{
+         return 0;
+     }
+ }
+ 
+ void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
+     if(esquive(cible->agl)==0){
+         printf("%s utilise %s,mais wow,%s esquive!\n",
+        attaquant->nom, a.nom,cible->nom);
+     }
+     else{
+     printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
+     cible->pvc = cible->pvc- a.degats+cible->def;
+     if (cible->pvc < 0) cible->pvc = 0;
+ }
+ }
+ 
+ void soigner(Champion* c) {
+     int soin = 30;
+     c->pvc += soin;
+     if (c->pvc > c->pvm) c->pvc = c->pvm;
+     printf("%s se soigne et récupère %d PV !\n", c->nom, soin);
+ }
+ 
+ void combat(Champion* perso1, Champion *perso2) {
+     int choix;
+ 
+     // Tour du joueur 1
+     printf("== Ton tour (%s) ==\n", perso1->nom);
+     for (int i = 0; i < 2; i++) {
+         printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
+     }
+     if (perso1->type == soutien) {
+         printf("3 - Se soigner\n");
+     }
+ 
+     printf("Choisis une action : ");
+     scanf("%d", &choix);
+ 
+     if (choix >= 1 && choix <= 2) {
+         utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+     } else if (choix == 3 && perso1->type == soutien) {
+         soigner(perso1);
+     } else {
+         printf("Choix invalide, tu perds ton tour !\n");
+     }
+ 
+     if (perso2->pvc <= 0) return;
+     afficherVie(*perso1,*perso2);
+ 
+     // Tour du joueur 2
+     printf("\n== Tour de l'ennemi (%s) ==\n", perso2->nom);
+     for (int i = 0; i < 2; i++) {
+         printf("%d - %s (dégâts : %d)\n", i + 1, perso2->att[i].nom, perso2->att[i].degats);
+     }
+     if (perso2->type == soutien) {
+         printf("3 - Se soigner\n");
+     }
+ 
+     printf("Choisis une action : ");
+     scanf("%d", &choix);
+ 
+     if (choix >= 1 && choix <= 2) {
+         utiliserAttaque(perso2, perso1, perso2->att[choix - 1]);
+     } else if (choix == 3 && perso2->type == soutien) {
+         soigner(perso2);
+     } else {
+         printf("Choix invalide, tu perds ton tour !\n");
+     }
+ }
+ 
+ int main() {
+     srand(time(NULL));
+     Champion a = {"haters", 350, 350, 200, 10, 6, {{"Coup de poing", 10}, {"Lame magique", 25}}, tank};
+     Champion b = {"manu", 300, 300, 200, 20, 6, {{"lunette", 50}, {"boucle", 30}}, soutien};
+ 
+     while (a.pvc > 0 && b.pvc > 0) {
+         afficherVie(a, b);
+         combat(&a, &b);
+     }
+ 
+     afficherVie(a, b);
+ 
+     // Affichage du gagnant
+     if (a.pvc > 0) {
+         printf("%s a gagné !\n", a.nom);
+     } else if (b.pvc > 0) {
+         printf("%s a gagné !\n", b.nom);
+     } else {
+         printf("Match nul !\n");
+     }
+ 
+     return 0;
+ 
