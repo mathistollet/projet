@@ -99,7 +99,7 @@ int esquive(int chance) {
 
 void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
     if (esquive(cible->agl)==0){
-        printf("\n mince il a esquivé aussi vite que chloe prime qui descend les escalier \n");
+        printf("\n mince il a esquivé  \n");
     }
     else{
     printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
