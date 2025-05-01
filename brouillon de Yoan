@@ -144,13 +144,6 @@ void combat(Champion* perso1, Champion *perso2) {
 }
     
     
-    
-    
-    
-    
-
-    // Tour du joueur 2
-    
 int main() {
     srand(time(NULL));
     Champion a = {"titeuf", 350, 350, 10, 20, 6,0, {{"Coup de poing", 50}, {"Lame magique", 25}}, tank};
@@ -180,12 +173,7 @@ int main() {
         }
     }
 
-
-
-
-
-
-    afficherVie(a, b);
+ afficherVie(a, b);
 
     // Affichage du gagnant
     if (a.pvc > 0) {
@@ -351,7 +339,12 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
     }
 
     printf("%s utilise sa technique spéciale : %s !\n", utilisateur->nom, tech->nom);
-    printf("%s\n", tech->description);
+    
+    
+    
+    
+    
+    
 
     if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
         if (strcmp(tech->operation, "add") == 0) {
@@ -360,9 +353,35 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
                 utilisateur->pvc = utilisateur->pvm;
             printf("%s récupère %.0f PV !\n", utilisateur->nom, tech->valeur);
         }
-    } else {
+        else {
+        cible->pvc =cible->pvc-tech->valeur;
+        
+            if (cible->pvc < 0){
+                    cible->pvc = 0;
+            }
+        printf("%s fais une grosse attaque et tape %s de  %.0f dégats !\n",utilisateur->nom, cible->nom, tech->valeur);
+            
+        }
+    } 
+    else {
         utilisateur->tours_effet_restant = tech->tours_actifs;
     }
+    
+  /*
+  if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs == 0){
+        if (strcmp(tech->operation, "sous") == 0) {
+            
+        }  
+        
+    }
+    */
+    
+    
+    
+    
+    
+    
+
     tech->recharge_restante = tech->recharge_max;
 }
 
@@ -381,7 +400,7 @@ void combat(Champion* perso1, Champion* perso2) {
         printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
     }
     if (perso1->type == soutien) printf("3 - Se soigner\n");
-    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s\n", perso1->technique.nom);
+    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
 
     printf("Choisis une action : ");
     scanf("%d", &choix);
@@ -400,7 +419,7 @@ void combat(Champion* perso1, Champion* perso2) {
     if (perso1->tours_effet_restant > 0) perso1->tours_effet_restant--;
     if (perso2->tours_effet_restant > 0) perso2->tours_effet_restant--;
     if (perso1->technique.recharge_restante > 0) perso1->technique.recharge_restante--;
-    if (perso2->technique.recharge_restante > 0) perso2->technique.recharge_restante--;
+    
 }
 
 int main() {
@@ -409,7 +428,7 @@ int main() {
     Champion a = {"titeuf", 350, 350, 10, 20, 6, 0,
         {{"Coup de poing", 50}, {"Lame magique", 25}},
         tank,
-        {"Rage berserk", "Augmente la vitesse pendant 2 tours.", 2.0, "vitess", "mul", 2, 3, 0},
+        {"Rage berserk", "grosse frappe de 40 degats.", 40.0, "pvc", "sous", 0, 3, 0},
         0
     };
 
@@ -444,8 +463,7 @@ int main() {
     else printf("Match nul !\n");
 
     return 0;
-}
-
+}     
 
 
 
