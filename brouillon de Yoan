@@ -218,6 +218,8 @@ int main() {
 
 
 
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -261,6 +263,8 @@ typedef struct {
     int tours_effet_restant;
 } Champion;
 
+
+
 const char* lesroles(Type type) {
     switch (type) {
         case 0: return "tank";
@@ -269,6 +273,8 @@ const char* lesroles(Type type) {
         default: return "inconnu";
     }
 }
+
+
 
 void afficherBarreDeVie(int pvact, int pvmax) {
     int longueurBarre = 20;
@@ -290,6 +296,8 @@ void afficherBarreDeVie(int pvact, int pvmax) {
     printf("%s] %d/%d PV\n", RESET, pvact, pvmax);
 }
 
+
+
 void afficherBarreDeVitesse(float barre_action) {
     int longueurBarre = 20;
     int nbBlocs = (barre_action * longueurBarre) / 100;
@@ -304,6 +312,8 @@ void afficherBarreDeVitesse(float barre_action) {
     printf("] %.2f/100 Vitesse\n", barre_action);
 }
 
+
+
 void afficherVie(Champion p1, Champion p2) {
     printf("\n--- ÉTAT DES COMBATTANTS ---\n");
     printf("%s : ", p1.nom);
@@ -316,9 +326,13 @@ void afficherVie(Champion p1, Champion p2) {
     printf("\n");
 }
 
+
 int esquive(int chance) {
     return (rand() % 101) > chance;
 }
+
+
+
 
 void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
     if (!esquive(cible->agl)) {
@@ -329,6 +343,12 @@ void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
         if (cible->pvc < 0) cible->pvc = 0;
     }
 }
+
+
+
+
+
+
 
 void utiliserTechnique(Champion *utilisateur, Champion *cible) {
     Technique *tech = &utilisateur->technique;
@@ -341,12 +361,7 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
     printf("%s utilise sa technique spéciale : %s !\n", utilisateur->nom, tech->nom);
     
     
-    
-    
-    
-    
-
-    if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
+     if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
         if (strcmp(tech->operation, "add") == 0) {
             utilisateur->pvc += tech->valeur;
             if (utilisateur->pvc > utilisateur->pvm)
@@ -367,23 +382,23 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
         utilisateur->tours_effet_restant = tech->tours_actifs;
     }
     
-  /*
-  if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs == 0){
+ 
+  if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs != 0){
         if (strcmp(tech->operation, "sous") == 0) {
+            
+            cible->tours_effet_restant=tech->tours_actifs;
             
         }  
         
     }
-    */
     
     
     
     
-    
-    
-
     tech->recharge_restante = tech->recharge_max;
 }
+
+
 
 void soigner(Champion* c) {
     int soin = 30;
@@ -425,14 +440,14 @@ void combat(Champion* perso1, Champion* perso2) {
 int main() {
     srand(time(NULL));
 
-    Champion a = {"titeuf", 350, 350, 10, 20, 6, 0,
+    Champion a = {"titeuf", 350, 350, 10, 20, 15, 0,
         {{"Coup de poing", 50}, {"Lame magique", 25}},
         tank,
         {"Rage berserk", "grosse frappe de 40 degats.", 40.0, "pvc", "sous", 0, 3, 0},
         0
     };
 
-    Champion b = {"manu", 300, 300, 10, 20, 4, 0,
+    Champion b = {"manu", 300, 300, 10, 20, 10, 0,
         {{"lunette", 50}, {"boucle", 30}},
         soutien,
         {"Soin sacré", "Restaure immédiatement 50 PV.", 50.0, "pvc", "add", 0, 3, 0},
@@ -459,13 +474,13 @@ int main() {
 
     afficherVie(a, b);
     if (a.pvc > 0) printf("%s a gagné !\n", a.nom);
+    
     else if (b.pvc > 0) printf("%s a gagné !\n", b.nom);
+    
     else printf("Match nul !\n");
 
     return 0;
 }     
-
-
 
 
 
