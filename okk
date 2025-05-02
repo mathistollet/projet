@@ -194,3 +194,124 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
             }    
     } 
     
+    
+    
+    
+    
+    
+
+    tech->recharge_restante = tech->recharge_max;
+}
+
+void soigner(Champion* c) {
+    int soin = 30;
+    c->pvc += soin;
+    if (c->pvc > c->pvm) c->pvc = c->pvm;
+    printf("%s se soigne et récupère %d PV !\n", c->nom, soin);
+}
+
+void combat(Champion* perso1, Champion* perso2) {
+    int choix;
+    printf("== Tour de %s ==\n", perso1->nom);
+
+    for (int i = 0; i < 2; i++) {
+        printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
+    }
+    if (perso1->type == soutien) printf("3 - Se soigner\n");
+    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
+
+    printf("Choisis une action : ");
+    scanf("%d", &choix);
+
+    if (choix >= 1 && choix <= 2) {
+        utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+    } 
+    
+    else if (choix == 3 && perso1->type == soutien) {
+        soigner(perso1);
+    } 
+    
+    else if (choix == 4 && perso1->technique.recharge_restante == 0) {
+        utiliserTechnique(perso1, perso2);
+    } 
+    
+    else {
+        printf("Choix invalide, tour perdu !\n");
+    }
+
+    // Gestion des effets et recharges
+    
+    
+ 
+    if (perso1->tours_effet_restant > 0) {
+    perso1->tours_effet_restant--;
+    }
+    if (perso1->tours_effet_restant == 0) {
+        // Rétablir la vitesse après la fin de l'effet
+            if (perso1->vitess != perso1->vitessmax){
+                perso1->vitess = perso1->vitessmax;
+                printf("L'effet de vitesse sur %s est terminé, vitesse rétablie.\n", perso1->nom);
+            
+        }
+        if (perso1->def != perso1->defmax){
+                perso1->def = perso1->defmax;
+                printf("L'effet de defense sur %s est terminé, defense rétablie.\n", perso1->nom);
+            
+    }
+    
+    }
+    
+    
+    
+    
+    if (perso2->tours_effet_restant > 0) perso2->tours_effet_restant--;
+    if (perso1->technique.recharge_restante > 0) perso1->technique.recharge_restante--;
+    
+}
+
+int main() {
+    srand(time(NULL));
+
+    Champion a = {"titeuf", 350, 350, 10,10, 20, 15,15, 0,
+        {{"Coup de poing", 50}, {"Lame magique", 25}},
+        tank,
+        {"Rage berserk", "grosse frappe de 40 degats.", 40.0, "pvc", "sous", 0, 3, 0},
+        0
+    };
+
+    Champion b = {"manu", 300, 300, 10,10, 20, 10,10, 0,
+        {{"lunette", 50}, {"boucle", 30}},
+        soutien,
+        {"glassement", "ralentit l'adversaire pendant 3 tour .", 2, "vitess", "div", 3, 3, 0},
+        0
+    };
+
+    while (a.pvc > 0 && b.pvc > 0) {
+        a.barre_action += a.vitess;
+        printf("barre d'action %f\n",a.barre_action );
+        b.barre_action += b.vitess;
+
+        if (a.barre_action >= 100 && a.pvc > 0) {
+            a.barre_action = 100;
+            afficherVie(a, b);
+            combat(&a, &b);
+            a.barre_action = 0;
+        }
+        if (b.barre_action >= 100 && b.pvc > 0) {
+            b.barre_action = 100;
+            afficherVie(a, b);
+            combat(&b, &a);
+            b.barre_action = 0;
+        }
+    }
+
+    afficherVie(a, b);
+    if (a.pvc > 0) printf("%s a gagné !\n", a.nom);
+    
+    else if (b.pvc > 0) printf("%s a gagné !\n", b.nom);
+    
+    else printf("Match nul !\n");
+
+    return 0;
+}
+    
