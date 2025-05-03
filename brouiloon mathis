@@ -336,6 +336,26 @@ void combat(Champion* perso1, Champion* perso2) {
     
 }
 
+Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3) {
+    int choix;
+    
+    Champion* options[3] = {c1, c2, c3};
+
+    printf("\nQui voulez-vous cibler ?\n");
+    for (int i = 0; i < 3; i++) {
+        printf("%d - %s (%d PV)\n", i + 1, options[i]->nom, options[i]->pvc);
+    }
+
+    scanf("%d", &choix);
+
+    if (choix < 1 || choix > 3) {
+        printf("Choix invalide ! Tour perdu.\n");
+        return NULL;
+    }
+
+    return options[choix - 1];
+}
+
 int main() {
     srand(time(NULL));
     Champion tous_les_champions[6];
