@@ -356,6 +356,71 @@ Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3) {
     return options[choix - 1];
 }
 
+
+
+
+void combat3v3(Champion* tousLesChampions, int nbChampions) {
+    Champion equipe1[3];
+    Champion equipe2[3];
+
+    // Sélection des équipes
+    selectionnerChampions(tousLesChampions, nbChampions, equipe1, 3, "Joueur 1");
+    selectionnerChampions(tousLesChampions, nbChampions, equipe2, 3, "Joueur 2");
+
+    printf("\nLe combat commence !\n");
+    
+    int equipe1vivants=3;
+    int equipe2vivants=3;
+    Champion cible;
+    
+    while(equipe1vivants>0&&equipe2vivants>0){
+     for(int i=0;i<3;i++){
+         equipe1[i].barre_action+=equipe1[i].vitess;
+         equipe2[i].barre_action+=equipe2[i].vitess;
+     }   
+   for(int j=0;j<3;j++){
+       if(equipe1[j].barre_action>=100 && equipe1[j].pvc>0){
+           equipe1[j].barre_action=100;
+           printf("%s peut enfin attaquer!\n",equipe1[j].nom);
+           getchar();
+           cible=selectionnercible(&equipe2[0],&equipe2[1],&equipe2[2]);
+           combat(&equipe1[j],&cible);
+            equipe1[j].barre_action=0;
+       }
+       if(equipe2[j].barre_action>=100 && equipe2[j].pvc>0){
+           equipe2[j].barre_action=100;
+           printf("%s peut enfin attaquer!\n",equipe2[j].nom);
+             getchar();
+           cible=selectionnercible(&equipe1[0],&equipe1[1],&equipe1[2]);
+           combat(&equipe2[j],&cible);
+            equipe2[j].barre_action=0;
+       }
+       }
+       equipe1vivants=0;
+       equipe2vivants=0;
+       
+        for (int i = 0; i < 3; i++) {
+            if (equipe1[i].pvc > 0){
+                 equipe1vivants++;
+            }
+            if (equipe2[i].pvc > 0){
+                 equipe2vivants++;
+            }
+        
+   }
+    if (equipe1vivants == 0) {
+            printf("Après une bataille épique,l'équipe 2 remporte la victoire !\n");
+            
+        } 
+        else if (equipe2vivants == 0) {
+            printf("Après une bataille épique,l'équipe 1 remporte la victoire !\n");
+    
+        }
+
+    }
+   
+}
+
 int main() {
     srand(time(NULL));
     Champion tous_les_champions[6];
