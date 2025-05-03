@@ -61,6 +61,8 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     }
 
     int i = 0;
+    char typeStr[20];  // <- variable temporaire pour stocker le type sous forme de chaîne
+
     while (fscanf(file, 
                   "nom=%s pvc=%d pvm=%d def=%f def_max=%f agl=%d vitess=%f vitessmax=%f barre_action=%f "
                   "att1_nom=%s att1_deg=%d att2_nom=%s att2_deg=%d type=%s "
@@ -70,18 +72,21 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
                   &champions[i].agl, &champions[i].vitess, &champions[i].vitessmax, &champions[i].barre_action,
                   champions[i].att[0].nom, &champions[i].att[0].degats, 
                   champions[i].att[1].nom, &champions[i].att[1].degats, 
+                  typeStr, // <- on lit ici dans la variable temporaire
                   champions[i].technique.nom, champions[i].technique.description, 
                   &champions[i].technique.valeur, champions[i].technique.propriete, 
                   champions[i].technique.operation, &champions[i].technique.tours_actifs, 
                   &champions[i].technique.recharge_max) != EOF) {
         
-        // Conversion de la chaîne type en valeur de l'énumération
-        if (strcmp(champions[i].type, "tank") == 0) {
+        // Conversion de typeStr en enum Type
+        if (strcmp(typeStr, "tank") == 0) {
             champions[i].type = tank;
-        } else if (strcmp(champions[i].type, "assassin") == 0) {
+        } else if (strcmp(typeStr, "assassin") == 0) {
             champions[i].type = assassin;
-        } else if (strcmp(champions[i].type, "soutien") == 0) {
+        } else if (strcmp(typeStr, "soutien") == 0) {
             champions[i].type = soutien;
+        } else {
+            champions[i].type = tank; // valeur par défaut en cas d'erreur
         }
 
         i++;
@@ -91,6 +96,7 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     fclose(file);
     return i;
 }
+
 
     
 
