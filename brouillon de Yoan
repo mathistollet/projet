@@ -1056,7 +1056,6 @@ selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2);
 
 
 
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
