@@ -1,26 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include<errno.h>
 #define RESET   "\033[0m"
 #define RED     "\033[0;31m"
 #define GREEN   "\033[0;32m"
 #define ORANGE  "\033[38;5;208m"
+#define SIZE 1000
 
 typedef enum {
     tank, assassin, soutien
@@ -397,6 +385,7 @@ scanf("%d",&choix);
         return NULL;
     }
     printf("\n%s attaque %s !\n", attaquant->nom, options[choix - 1]->nom);
+     printf("\n");
     combat(attaquant, options[choix - 1]);
     
     
@@ -406,23 +395,44 @@ scanf("%d",&choix);
 
 
 
+void debutc(){
+	FILE *fichier=fopen("debutcombat.txt","r");
+	if(fichier==NULL){
+	printf("ERREUR 'affiche_debutcombat':%d\n",errno);
+	printf("Message d'erreur:%s\n",strerror(errno));
+	exit(11);
+	}
+	int c=fgetc(fichier);
+	
+	while(c!=EOF){
+	
+	printf("%c",c);
+	c=fgetc(fichier);
+	}
+	fclose(fichier);
+	
+}
 
-void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2) {
+
+
+
+void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2,char* nomEquipe1,char* nomEquipe2) {
    
 
    
     
-    printf("\n--- Équipe 1 ---\n");
+    printf("\n--- %s ---\n",nomEquipe1);
     for (int i = 0; i < 3; i++){
      afficherChampion(&equipe1[i], i + 1);
 	}
-    printf("\n--- Équipe 2 ---\n");
+    printf("\n--- %s ---\n",nomEquipe2);
     
     for (int i = 0; i < 3; i++){
      afficherChampion(&equipe2[i], i + 1);
 	}
-    printf("\nLe combat commence !\n");
+	debutc();
       printf("\n");
+      getchar();
     
     int equipe1vivants=3;
     int equipe2vivants=3;
@@ -436,20 +446,21 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
    for(int j=0;j<3;j++){
        if(equipe1[j].barre_action>=100 && equipe1[j].pvc>0){
            equipe1[j].barre_action=100;
+           
+           sleep(2);
+                       
            printf("== Tour de %s ==\n", equipe1[j].nom);
-           getchar();
-            
            cible=selectionnerCible(&equipe2[0],&equipe2[1],&equipe2[2], &equipe1[j]);
            equipe1[j].barre_action=0;
            
            printf("---ETAT DES COMBATTANTS---\n");
-           
+           printf("equipe %s \n",nomEquipe1);
            for(int k=0;k<3;k++){
            	afficherVie(equipe1[k]);
            
        		}
        	printf("\n");
-       	
+       	printf("equipe %s\n",nomEquipe2);
        	   for(int k=0;k<3;k++){
        	   	afficherVie(equipe2[k]);
        	   	
@@ -459,8 +470,9 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
        }
        if(equipe2[j].barre_action>=100 && equipe2[j].pvc>0){
            equipe2[j].barre_action=100;
+           
+           sleep(2);
            printf("== Tour de %s ==\n", equipe2[j].nom);
-             getchar();
              
            cible=selectionnerCible(&equipe1[0],&equipe1[1],&equipe1[2],&equipe2[j]);
            equipe2[j].barre_action=0;
@@ -511,17 +523,17 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
 
 
 
-void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*equipe1,Champion*equipe2){
+void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*equipe1,Champion*equipe2,char* nomEquipe1,char* nomEquipe2){
  printf("=== SELECTION DES EQUIPES ===\n");
  int choix;
  int totalchoix=0;
  while(totalchoix<6){
  		if(totalchoix%2==0){
-                       printf("Choix de l'equipe 1\n");
+                       printf("Choix de %s\n",nomEquipe1);
                } 
                
                else {
-                       printf("Choix de l'equipe 2\n");
+                       printf("Choix de %s\n",nomEquipe2);
                }
  for (int i = 0; i < nb_champions; i++) {
  
@@ -566,6 +578,22 @@ if (!lireEntier(&choix)) {
 
 
 int main() {
+    char nomEquipe1[SIZE];
+    char nomEquipe2[SIZE];
+    printf("Entrez le nom de la première équipe : ");
+    scanf("%s",nomEquipe1);
+    while(strlen(nomEquipe1)>SIZE||strlen(nomEquipe1)==0){
+   	 printf("votre nom est incorrect,veuillez recommencer\n");
+    		scanf("%s",nomEquipe1);
+    
+	}
+    printf("Entrez le nom de la deuxième équipe : ");
+    scanf("%s",nomEquipe2);
+    while(strlen(nomEquipe2)>SIZE||strlen(nomEquipe2)==0){
+   	 printf("votre nom est incorrect,veuillez recommencer\n");
+    		scanf("%s",nomEquipe2);
+    	}
+    	
     srand(time(NULL));
     Champion* tous_les_champions=malloc(sizeof(Champion)*6);
     if(tous_les_champions==NULL){
@@ -591,8 +619,8 @@ int main() {
     exit(1);
     }
     
-selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2);
-  combat3v3(tous_les_champions,nb_champions,equipe1,equipe2);
+selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2,nomEquipe1,nomEquipe2);
+  combat3v3(tous_les_champions,nb_champions,equipe1,equipe2,nomEquipe1,nomEquipe2);
   
    
    
