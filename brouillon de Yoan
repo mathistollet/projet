@@ -1,529 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#define RESET   "\033[0m"
-#define RED     "\033[0;31m"
-#define GREEN   "\033[0;32m"
-#define ORANGE  "\033[38;5;208m"
-
-#define MAX_PERSOS 6
-
-typedef enum {
-    tank, assassin, soutien
-} Type;
-
-typedef struct {
-    char nom[30];
-    int degats;
-} Attaque;
-
-typedef struct {
-    char nom[50];
-    char description[100];
-    float valeur;
-    char propriete[20];
-    char operation[10];
-    int tours_actifs;
-    int recharge_max;
-    int recharge_restante;
-} Technique;
-
-typedef struct {
-    char nom[50];
-    int pvc;
-    int pvm;
-    float def;
-    float def_base;
-    float agl;
-    float vitess;
-    float vitessmax;
-    float barre_action;
-    Attaque att[2];
-    Type type;
-    Technique technique;
-    int tours_effet_restant;
-} Champion;
-
-Type lireType(const char* str) {
-    if (strcmp(str, "tank") == 0) return tank;
-    if (strcmp(str, "assassin") == 0) return assassin;
-    if (strcmp(str, "soutien") == 0) return soutien;
-    return tank;
-}
-
-
-void lireChampionsDepuisFichier(Champion persos[], const char* nomFichier) {
-    FILE* f = fopen(nomFichier, "r");
-    if (!f) {
-        perror("Erreur ouverture fichier");
-        exit(1);
-    }
-
-    char ligne[128];
-    int i = -1;
-    while (fgets(ligne, sizeof(ligne), f)) {
-        if (strncmp(ligne, "nom=", 4) == 0) {
-            i++;
-            sscanf(ligne, "nom=%[^\n]", persos[i].nom);
-        } else if (strncmp(ligne, "pvc=", 4) == 0) sscanf(ligne, "pvc=%d", &persos[i].pvc);
-        else if (strncmp(ligne, "pvm=", 4) == 0) sscanf(ligne, "pvm=%d", &persos[i].pvm);
-        else if (strncmp(ligne, "def=", 4) == 0) sscanf(ligne, "def=%f", &persos[i].def);
-        else if (strncmp(ligne, "defmax=", 10) == 0) sscanf(ligne, "defmax=%f", &persos[i].def_base);
-        else if (strncmp(ligne, "agl=", 4) == 0) sscanf(ligne, "agl=%f", &persos[i].agl);
-        else if (strncmp(ligne, "vitess=", 7) == 0) sscanf(ligne, "vitess=%f", &persos[i].vitess);
-        else if (strncmp(ligne, "att1_nom=", 9) == 0) sscanf(ligne, "att1_nom=%[^\n]", persos[i].att[0].nom);
-        else if (strncmp(ligne, "att1_deg=", 9) == 0) sscanf(ligne, "att1_deg=%d", &persos[i].att[0].degats);
-        else if (strncmp(ligne, "att2_nom=", 9) == 0) sscanf(ligne, "att2_nom=%[^\n]", persos[i].att[1].nom);
-        else if (strncmp(ligne, "att2_deg=", 9) == 0) sscanf(ligne, "att2_deg=%d", &persos[i].att[1].degats);
-        else if (strncmp(ligne, "type=", 5) == 0) {
-            char typeStr[20];
-            sscanf(ligne, "type=%s", typeStr);
-            persos[i].type = lireType(typeStr);
-        } else if (strncmp(ligne, "tech_nom=", 9) == 0) sscanf(ligne, "tech_nom=%[^\n]", persos[i].technique.nom);
-        else if (strncmp(ligne, "tech_desc=", 10) == 0) sscanf(ligne, "tech_desc=%[^\n]", persos[i].technique.description);
-        else if (strncmp(ligne, "valeur=", 7) == 0) sscanf(ligne, "valeur=%f", &persos[i].technique.valeur);
-        else if (strncmp(ligne, "propriete=", 10) == 0) sscanf(ligne, "propriete=%s", persos[i].technique.propriete);
-        else if (strncmp(ligne, "operation=", 9) == 0) sscanf(ligne, "operation=%s", persos[i].technique.operation);
-        else if (strncmp(ligne, "tours_actifs=", 13) == 0) sscanf(ligne, "tours_actifs=%d", &persos[i].technique.tours_actifs);
-        else if (strncmp(ligne, "recharge_max=", 13) == 0) sscanf(ligne, "recharge_max=%d", &persos[i].technique.recharge_max);
-    }
-
-    fclose(f);
-}
-
-
-
-void afficherChampion(const Champion* c, int index) {
-    printf("%d - %s [Type: %d, PV: %d, Déf: %.1f, Vit: %.1f]\n",
-           index, c->nom, c->type, c->pvm, c->def, c->vitess);
-}
-
-int estDejaChoisi(Champion* equipes[6], int taille, Champion* candidat) {
-    for (int i = 0; i < taille; i++) {
-        if (equipes[i] == candidat) return 1;
-    }
-    return 0;
-}
-
-
-
-const char* lesroles(Type type) {
-    switch (type) {
-        case 0: return "tank";
-        case 1: return "assassin";
-        case 2: return "soutien";
-        default: return "inconnu";
-    }
-}
-
-
-
-void afficherBarreDeVie(int pvact, int pvmax) {
-    int longueurBarre = 20;
-    int nbBlocs = (pvact * longueurBarre) / pvmax;
-    float ratio = (float)pvact / pvmax;
-
-    const char *couleur;
-    if (ratio > 0.6) couleur = GREEN;
-    else if (ratio > 0.3) couleur = ORANGE;
-    else couleur = RED;
-
-    printf("[");
-    for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
-            printf("%s█", couleur);
-        else
-            printf("%s ", RESET);
-    }
-    printf("%s] %d/%d PV\n", RESET, pvact, pvmax);
-}
-
-
-
-void afficherBarreDeVitesse(float barre_action) {
-    int longueurBarre = 20;
-    int nbBlocs = (barre_action * longueurBarre) / 100;
-
-    printf("[");
-    for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
-            printf("%s█", GREEN);
-        else
-            printf("%s ", RESET);
-    }
-    printf("] %.2f/100 Vitesse\n", barre_action);
-}
-
-
-
-void afficherVie(Champion p1, Champion p2,Champion p3) {
-    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
-    printf("%s : ", p1.nom);
-    afficherBarreDeVie(p1.pvc, p1.pvm);
-    afficherBarreDeVitesse(p1.barre_action);
-
-    printf("%s : ", p2.nom);
-    afficherBarreDeVie(p2.pvc, p2.pvm);
-    afficherBarreDeVitesse(p2.barre_action);
-    printf("\n");
-    
-    printf("%s : ", p3.nom);
-    afficherBarreDeVie(p3.pvc, p3.pvm);
-    afficherBarreDeVitesse(p3.barre_action);
-}
-
-
-int esquive(int chance) {
-    return (rand() % 101) > chance;
-}
-
-
-void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
-    if (!esquive(cible->agl)) {
-        printf("\n%s esquive avec grâce !\n", cible->nom);
-    } else {
-        printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
-        cible->pvc -= (a.degats - cible->def);
-        if (cible->pvc < 0) cible->pvc = 0;
-    }
-}
-
-
-
-
-
-
-void utiliserTechnique(Champion *utilisateur, Champion *cible) {
-    Technique *tech = &utilisateur->technique;
-
-    if (tech->recharge_restante > 0) {
-        printf("%s ne peut pas encore utiliser sa technique spéciale (%d tours restants).\n", utilisateur->nom, tech->recharge_restante);
-        return;
-    }
-
-    printf("%s utilise sa technique spéciale : %s !\n", utilisateur->nom, tech->nom);
-    
-    if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
-        if (strcmp(tech->operation, "add") == 0) {
-            utilisateur->pvc += tech->valeur;
-            if (utilisateur->pvc > utilisateur->pvm)
-                utilisateur->pvc = utilisateur->pvm;
-            printf("%s récupère %.0f PV !\n", utilisateur->nom, tech->valeur);
-        }
-        else {
-        cible->pvc =cible->pvc-tech->valeur;
-        
-            if (cible->pvc < 0){
-                    cible->pvc = 0;
-            }
-        printf("%s fais une grosse attaque et tape %s de  %.0f dégats !\n",utilisateur->nom, cible->nom, tech->valeur);
-            
-        }
-    } 
-    
-   if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs > 0) {
-            if (strcmp(tech->operation, "div") == 0) {
-                cible->vitess -= cible->vitess/tech->valeur;  
-                
-                if (cible->vitess < 0){
-                 cible->vitess = 0;
-                 }
-                cible->tours_effet_restant = tech->tours_actifs;
-                printf("%s perd %.0f%% de vitesse pour %d tours !\n", cible->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }
-            
-            
-            if (strcmp(tech->operation, "mul") == 0) {
-                utilisateur->vitess = tech->valeur* utilisateur->vitess;  
-                utilisateur->tours_effet_restant = tech->tours_actifs;
-                printf("%s gagne %.0f%% de vitesse pour %d tours !\n", utilisateur->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }    
-    } 
-    
-          
-    if (strcmp(tech->propriete, "def") == 0 && tech->tours_actifs > 0) {
-            if (strcmp(tech->operation, "div") == 0) {
-                cible->def = cible->def/tech->valeur;  
-                
-                if (cible->def < 0) cible->def = 0;
-                cible->tours_effet_restant = tech->tours_actifs;
-                printf("%s perd %.0f de defense pour %d tours !\n", cible->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }
-            
-            
-            if (strcmp(tech->operation, "mul") == 0) {
-                utilisateur->def = tech->valeur* utilisateur->def;  
-                utilisateur->tours_effet_restant = tech->tours_actifs;
-                printf("%s gagne %.0f% de defense pour %d tours !\n", utilisateur->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }    
-    } 
-    
-     
-        
-    
-    
-
-
-    tech->recharge_restante = tech->recharge_max;
-}
-
-void soigner(Champion* c) {
-    int soin = 30;
-    c->pvc += soin;
-    if (c->pvc > c->pvm) c->pvc = c->pvm;
-    printf("%s se soigne et récupère %d PV !\n", c->nom, soin);
-}
-
-
-
-
-
-
-
-
-void combat(Champion* perso1, Champion* perso2) {
-    int choix;
-
-    for (int i = 0; i < 2; i++) {
-        printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
-    }
-    if (perso1->type == soutien) printf("3 - Se soigner\n");
-    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
-
-    printf("Choisis une action : ");
-    scanf("%d", &choix);
-
-    if (choix >= 1 && choix <= 2) {
-        utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
-    } 
-    
-    else if (choix == 3 && perso1->type == soutien) {
-        soigner(perso1);
-    } 
-    
-    else if (choix == 4 && perso1->technique.recharge_restante == 0) {
-        utiliserTechnique(perso1, perso2);
-    } 
-    
-    else {
-        printf("Choix invalide, tour perdu !\n");
-    }
-
-    // Gestion des effets et recharges
-    
-    
- 
-    if (perso1->tours_effet_restant > 0) {
-    perso1->tours_effet_restant--;
-    }
-    if (perso1->tours_effet_restant == 0) {
-        // Rétablir la vitesse après la fin de l'effet
-            if (perso1->vitess != perso1->vitessmax){
-                perso1->vitess = perso1->vitessmax;
-                printf("L'effet de vitesse sur %s est terminé, vitesse rétablie.\n", perso1->nom);
-            
-        }
-    }
-    
-   
-    if (perso2->tours_effet_restant > 0) perso2->tours_effet_restant--;
-    if (perso1->technique.recharge_restante > 0) perso1->technique.recharge_restante--;
-    
-}
-
-
-
-Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3) {
-    int choix;
-    
-    Champion* options[3] = {c1, c2, c3};
-
-    printf("\nQui voulez-vous cibler ?\n");
-    for (int i = 0; i < 3; i++) {
-        printf("%d - %s (%d PV)\n", i + 1, options[i]->nom, options[i]->pvc);
-    }
-
-    scanf("%d", &choix);
-
-    if (choix < 1 || choix > 3) {
-        printf("Choix invalide ! Tour perdu.\n");
-        return NULL;
-    }
-
-    return options[choix - 1];
-}
-
-
-
-
-int main() {
-    srand(time(NULL));
-    
-    
-       Champion persos[MAX_PERSOS];
-    lireChampionsDepuisFichier(persos, "personnages.txt");
-
-    Champion* equipe1[3] = { NULL };
-    Champion* equipe2[3] = { NULL };
-    int choix;
-    int totalChoix = 0;
-
-    printf("=== SELECTION DES EQUIPES ===\n");
-
-    while (totalChoix < 6) {
-        int joueur = totalChoix % 2 + 1;
-        printf("\nJoueur %d, choisissez un personnage :\n", joueur);
-
-        for (int i = 0; i < MAX_PERSOS; i++) {
-            if (!estDejaChoisi(equipe1, 3, &persos[i]) && !estDejaChoisi(equipe2, 3, &persos[i])) {
-                afficherChampion(&persos[i], i + 1);
-            }
-        }
-
-        scanf("%d", &choix);
-        if (choix < 1 || choix > MAX_PERSOS || estDejaChoisi(equipe1, 3, &persos[choix - 1]) || estDejaChoisi(equipe2, 3, &persos[choix - 1])) {
-            printf("Choix invalide ou déjà pris. Réessayez.\n");
-            continue;
-        }
-
-        if (joueur == 1)
-            equipe1[totalChoix / 2] = &persos[choix - 1];
-        else
-            equipe2[totalChoix / 2] = &persos[choix - 1];
-
-        totalChoix++;
-    }
-
-    printf("\n--- Équipe 1 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(equipe1[i], i + 1);
-
-    printf("\n--- Équipe 2 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(equipe2[i], i + 1);
-    
-    
-    
-    
-
-
- Champion titeuf = {"titeuf", 350, 350, 10,10, 20, 15,15, 0,
-        {{"Coup de poing", 50}, {"Lame magique", 25}},
-        tank,
-        {"Rage berserk", "grosse frappe de 40 degats.", 40.0, "pvc", "sous", 0, 3, 0},
-        0
-    };
-
-    Champion manu= {"manu", 300, 300, 10,10, 20, 10,10, 0,
-        {{"lunette", 50}, {"boucle", 30}},
-        soutien,
-        {"glassement", "ralentit l'adversaire pendant 3 tour .", 2.0, "vitess", "div", 3, 3, 0},
-        0
-    };
-    
-    Champion sedarp = {"sedarp", 400, 400, 20,20, 10, 20,20, 0,
-        {{"Marteau écrasant", 40}, {"Ruée", 30}},
-        soutien,
-        {"Mur d'acier", "Réduit la vitesse reçus de 30%% pendant 2 tours", 1.5, "vitess", "div", 3, 3, 0},
-        0
-    };
-    
-
-    while (titeuf.pvc > 0 && manu.pvc > 0 && sedarp.pvc > 0) {
-    	
-    	
-        titeuf.barre_action += titeuf.vitess;
-        manu.barre_action += manu.vitess;
-        sedarp.barre_action += sedarp.vitess;
-
-        if (titeuf.barre_action >= 100 && titeuf.pvc > 0) {
-            titeuf.barre_action = 100;
-            afficherVie(titeuf, manu,sedarp);
-            
-             printf("== Tour de %s ==\n", titeuf.nom);
-            Champion* cible = selectionnerCible(&titeuf, &manu, &sedarp);
-            
-    		if (cible != NULL) {
-        		combat(&titeuf, cible);
-    		}
-            titeuf.barre_action = 0;
-        }
-          
-        
-        if (manu.barre_action >= 100 && manu.pvc > 0) {
-            manu.barre_action = 100;
-            afficherVie(titeuf, manu,sedarp);
-            
-            printf("== Tour de %s ==\n", manu.nom);
-  	    Champion* cible = selectionnerCible(&titeuf, &manu, &sedarp);
-            
-	    if (cible != NULL) {
-        		combat(&manu, cible);
-    	    }
-    		
-    		
-            manu.barre_action = 0;
-        }
-        
-        
-        if (sedarp.barre_action >= 100 && sedarp.pvc > 0) {
-            sedarp.barre_action = 100;
-            afficherVie(titeuf, manu, sedarp);
-            
-             printf("== Tour de %s ==\n", sedarp.nom);
-             
-       	    Champion* cible = selectionnerCible(&titeuf, &manu, &sedarp);
-            
-    		if (cible != NULL) {
-        		combat(&sedarp, cible);
-    		}
-            sedarp.barre_action = 0;
-        }
-    }
-
-    afficherVie(titeuf, manu,sedarp);
-    if (titeuf.pvc > 0 && manu.pvc==0 && sedarp.pvc==0) printf("%s a gagné !\n", titeuf.nom);
-    
-    else if (manu.pvc > 0 && titeuf.pvc==0  && sedarp.pvc == 0) printf("%s a gagné !\n", manu.nom);
-    else if (sedarp.pvc > 0 && titeuf.pvc==0 && manu.pvc==0) printf("%s a gagné !\n", sedarp.nom);
-    
-    else printf("Match nul !\n");
-
-    return 0;
-}     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -590,8 +65,8 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     char typeStr[20];  // <- variable temporaire pour stocker le type sous forme de chaîne
 
     while (fscanf(file, 
-                  "%s %d %d %f %f %d %f %f %f  %s %d %s %d %s %s %[^\n] %f %s %s %d %d\n ",
-          
+                  "%s %d %d %f %f %d %f %f %f %s %d %s %d %s %s %s %f %s %s %d %d\n",
+        
                   champions[i].nom, 
                   &champions[i].pvc, &champions[i].pvm, &champions[i].def, &champions[i].defmax,
                   &champions[i].agl, &champions[i].vitess, &champions[i].vitessmax, &champions[i].barre_action,
@@ -606,550 +81,22 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
         // Conversion de typeStr en enum Type
         if (strcmp(typeStr, "tank") == 0) {
             champions[i].type = tank;
-        } else if (strcmp(typeStr, "assassin") == 0) {
-            champions[i].type = assassin;
-        } else if (strcmp(typeStr, "soutien") == 0) {
-            champions[i].type = soutien;
-        } else {
-            champions[i].type = tank; // valeur par défaut en cas d'erreur
-        }
-
-        i++;
-        if (i >= max) break; // On s'assure de ne pas dépasser le nombre maximal de champions
-    }
-
-    fclose(file);
-    return i;
-}
-
-
-    
-
-void afficherChampion( Champion* c, int index) {
-    printf("%d - %s [Type: %d, PV: %d, Déf: %.1f, Vit: %.1f]\n",
-           index, c->nom, c->type, c->pvm, c->def, c->vitess);
-}
-
-int estDejaChoisi(Champion* equipes, int taille, Champion* candidat) {
-    for (int i = 0; i < taille; i++) {
-        if (strcmp(equipes[i].nom, candidat->nom) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
-
-
-void afficherBarreDeVie(int pvact, int pvmax) {
-    int longueurBarre = 20;
-    int nbBlocs = (pvact * longueurBarre) / pvmax;
-    float ratio = (float)pvact / pvmax;
-
-    const char *couleur;
-    if (ratio > 0.6) couleur = GREEN;
-    else if (ratio > 0.3) couleur = ORANGE;
-    else couleur = RED;
-
-    printf("[");
-    for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
-            printf("%s█", couleur);
-        else
-            printf("%s ", RESET);
-    }
-    printf("%s] %d/%d PV\n", RESET, pvact, pvmax);
-}
-
-
-
-void afficherBarreDeVitesse(float barre_action) {
-    int longueurBarre = 20;
-    int nbBlocs = (barre_action * longueurBarre) / 100;
-
-    printf("[");
-    for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
-            printf("%s█", GREEN);
-        else
-            printf("%s ", RESET);
-    }
-    printf("] %.2f/100 Vitesse\n", barre_action);
-}
-
-
-
-void afficherVie(Champion p1, Champion p2) {
-    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
-    printf("%s : ", p1.nom);
-    afficherBarreDeVie(p1.pvc, p1.pvm);
-    afficherBarreDeVitesse(p1.barre_action);
-
-    printf("%s : ", p2.nom);
-    afficherBarreDeVie(p2.pvc, p2.pvm);
-    afficherBarreDeVitesse(p2.barre_action);
-    printf("\n");
-}
-
-
-int esquive(int chance) {
-    return (rand() % 101) > chance;
-}
-
-
-void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
-    if (!esquive(cible->agl)) {
-        printf("\n%s esquive avec grâce !\n", cible->nom);
-    } else {
-        printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
-        cible->pvc -= (a.degats - cible->def);
-        if (cible->pvc < 0) cible->pvc = 0;
-    }
-}
-
-
-
-
-void utiliserTechnique(Champion *utilisateur, Champion *cible) {
-    Technique *tech = &utilisateur->technique;
-
-    if (tech->recharge_restante > 0) {
-        printf("%s ne peut pas encore utiliser sa technique spéciale (%d tours restants).\n", utilisateur->nom, tech->recharge_restante);
-        return;
-    }
-
-    printf("%s utilise sa technique spéciale : %s !\n", utilisateur->nom, tech->nom);
-    
-    
-     if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
-        if (strcmp(tech->operation, "add") == 0) {
-            utilisateur->pvc += tech->valeur;
-            if (utilisateur->pvc > utilisateur->pvm)
-                utilisateur->pvc = utilisateur->pvm;
-            printf("%s récupère %.0f PV !\n", utilisateur->nom, tech->valeur);
-        }
-        else {
-        cible->pvc =cible->pvc-tech->valeur;
-        
-            if (cible->pvc < 0){
-                    cible->pvc = 0;
-            }
-        printf("%s fais une grosse attaque et tape %s de  %.0f dégats !\n",utilisateur->nom, cible->nom, tech->valeur);
-            
-        }
-    } 
-    
-   if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs > 0) {
-            if (strcmp(tech->operation, "div") == 0) {
-                cible->vitess -= cible->vitess/tech->valeur;  
-                
-                if (cible->vitess < 0){
-                 cible->vitess = 0;
-                 }
-                cible->tours_effet_restant = tech->tours_actifs;
-                printf("%s perd %.0f%% de vitesse pour %d tours !\n", cible->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }
-            
-            
-            if (strcmp(tech->operation, "mul") == 0) {
-                utilisateur->vitess = tech->valeur* utilisateur->vitess;  
-                utilisateur->tours_effet_restant = tech->tours_actifs;
-                printf("%s gagne %.0f%% de vitesse pour %d tours !\n", utilisateur->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }    
-    } 
-    
-          
-    if (strcmp(tech->propriete, "def") == 0 && tech->tours_actifs > 0) {
-            if (strcmp(tech->operation, "div") == 0) {
-                cible->def = cible->def/tech->valeur;  
-                
-                if (cible->def < 0) cible->def = 0;
-                cible->tours_effet_restant = tech->tours_actifs;
-                printf("%s perd %.0f de defense pour %d tours !\n", cible->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }
-            
-            
-            if (strcmp(tech->operation, "mul") == 0) {
-                utilisateur->def = tech->valeur* utilisateur->def;  
-                utilisateur->tours_effet_restant = tech->tours_actifs;
-                printf("%s gagne %.0f% de defense pour %d tours !\n", utilisateur->nom, (tech->valeur-1)*100, tech->tours_actifs);
-            }    
-    } 
-    
-    
-
-    tech->recharge_restante = tech->recharge_max;
-}
-
-void soigner(Champion* c) {
-    int soin = 30;
-    c->pvc += soin;
-    if (c->pvc > c->pvm) c->pvc = c->pvm;
-    printf("%s se soigne et récupère %d PV !\n", c->nom, soin);
-}
-
-void combat(Champion* perso1, Champion* perso2) {
-    int choix;
-    printf("\n");
-
-    for (int i = 0; i < 2; i++) {
-        printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
-    }
-    if (perso1->type == soutien) printf("3 - Se soigner\n");
-    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
-    
-    
-    printf("\n");
-    printf("Choisis une action : ");
-    printf("\n");
-    scanf("%d", &choix);
-    printf("\n");
-
-    if (choix >= 1 && choix <= 2) {
-        utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
-        printf("\n");
-    } 
-    
-    else if (choix == 3 && perso1->type == soutien) {
-        soigner(perso1);
-        printf("\n");
-    } 
-    
-    else if (choix == 4 && perso1->technique.recharge_restante == 0) {
-        utiliserTechnique(perso1, perso2);
-         printf("\n");
-    } 
-    
-    else {
-        printf("Choix invalide, tour perdu !\n");
-             printf("\n");
-    }
-
-    // Gestion des effets et recharges
-    
-    
- 
-    if (perso1->tours_effet_restant > 0) {
-    perso1->tours_effet_restant--;
-    }
-    if (perso1->tours_effet_restant == 0) {
-        // Rétablir la vitesse après la fin de l'effet
-            if (perso1->vitess != perso1->vitessmax){
-                perso1->vitess = perso1->vitessmax;
-                printf("L'effet de vitesse sur %s est terminé, vitesse rétablie.\n", perso1->nom);
-            
-        }
-        if (perso1->def != perso1->defmax){
-                perso1->def = perso1->defmax;
-                printf("L'effet de defense sur %s est terminé, defense rétablie.\n", perso1->nom);
-            
-    }
-    
-    }
-    
-    
-    
-    
-    if (perso2->tours_effet_restant > 0) perso2->tours_effet_restant--;
-    if (perso1->technique.recharge_restante > 0) perso1->technique.recharge_restante--;
-    
-}
-
-Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* attaquant) {
-    int choix;
-    
-    Champion* options[3] = {c1, c2, c3};
-
-    printf("\nQui voulez-vous cibler ?\n");
-    for (int i = 0; i < 3; i++) {
-        printf("%d - %s (%d PV)\n", i + 1, options[i]->nom, options[i]->pvc);
-    }
-
-    scanf("%d", &choix);
-
-    if (choix < 1 || choix > 3 || options[choix - 1]->pvc==0) {
-        printf("Choix invalide ! Tour perdu.\n");
-        return NULL;
-    }
-    printf("\n%s attaque %s !\n", attaquant->nom, options[choix - 1]->nom);
-    combat(attaquant, options[choix - 1]);
-    
-    
-    return options[choix - 1];
-}
-
-
-
-
-void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2) {
-   
-
-   
-    
-    printf("\n--- Équipe 1 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(&equipe1[i], i + 1);
-
-    printf("\n--- Équipe 2 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(&equipe2[i], i + 1);
-
-    printf("\nLe combat commence !\n");
-      printf("\n");
-    
-    int equipe1vivants=3;
-    int equipe2vivants=3;
-    Champion* cible;
-    
-    while(equipe1vivants>0&&equipe2vivants>0){
-     for(int i=0;i<3;i++){
-         equipe1[i].barre_action+=equipe1[i].vitess;
-         equipe2[i].barre_action+=equipe2[i].vitess;
-     }   
-   for(int j=0;j<3;j++){
-       if(equipe1[j].barre_action>=100 && equipe1[j].pvc>0){
-           equipe1[j].barre_action=100;
-           printf("== Tour de %s ==\n", equipe1[j].nom);
-           getchar();
-           cible=selectionnerCible(&equipe2[0],&equipe2[1],&equipe2[2], &equipe1[j]);
-           equipe1[j].barre_action=0;
-       }
-       if(equipe2[j].barre_action>=100 && equipe2[j].pvc>0){
-           equipe2[j].barre_action=100;
-           printf("== Tour de %s ==\n", equipe2[j].nom);
-             getchar();
-           cible=selectionnerCible(&equipe1[0],&equipe1[1],&equipe1[2],&equipe2[j]);
-           equipe2[j].barre_action=0;
-       }
-       }
-       equipe1vivants=0;
-       equipe2vivants=0;
-       
-        for (int i = 0; i < 3; i++) {
-            if (equipe1[i].pvc > 0){
-                 equipe1vivants++;
-            }
-            if (equipe2[i].pvc > 0){
-                 equipe2vivants++;
-            }
-        
-   }
-    if (equipe1vivants == 0) {
-            printf("Après une bataille épique,l'équipe 2 remporte la victoire !\n");
-            
         } 
-        else if (equipe2vivants == 0) {
-            printf("Après une bataille épique,l'équipe 1 remporte la victoire !\n");
-    
-        }
-
-    }
-   
-}
-
-
-
-
-void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*equipe1,Champion*equipe2){
- printf("=== SELECTION DES EQUIPES ===\n");
- int choix;
- int totalchoix=0;
- while(totalchoix<6){
- 		if(totalchoix%2==0){
-                       printf("Choix de l'equipe 1\n");
-               } 
-               
-               else {
-                       printf("Choix de l'equipe 2\n");
-               }
- for (int i = 0; i < nb_champions; i++) {
- 
-            if (!estDejaChoisi(equipe1, 3, &tous_les_champions[i]) && !estDejaChoisi(equipe2, 3, &tous_les_champions[i])) {
-        	afficherChampion(&tous_les_champions[i], i + 1);
-    }
-        }
-         printf("\n");
-         scanf("%d", &choix);
-         printf("\n");
-         
-           if (choix < 1 || choix > nb_champions|| estDejaChoisi(equipe1, 3, &tous_les_champions[choix - 1]) || estDejaChoisi(equipe2, 3,&tous_les_champions[choix - 1])) {
-            printf("Choix invalide ou déjà pris. Réessayez.\n");
-            continue;
-           }
-           
-           
-               if(totalchoix%2==0){
-                       equipe1[totalchoix/2]=tous_les_champions[choix-1];
-               } 
-               
-               else {
-                       equipe2[totalchoix/2]=tous_les_champions[choix-1];
-               }
-        totalchoix++;
-        }
-
- }
-
-
-
-
-
-
-
-
-int main() {
-    srand(time(NULL));
-    Champion* tous_les_champions=malloc(sizeof(Champion)*6);
-    if(tous_les_champions==NULL){
-    printf("erreur\n");
-    exit(1);
-    }
-    int nb_champions = chargerChampionsDepuisFichier("personnages.txt", tous_les_champions, 6);
-
-    if (nb_champions == 0) {
-        printf("Erreur : Aucun champion chargé.\n");
-        return 1;
-    }
-    
-    Champion*equipe1=malloc(sizeof(Champion)*3);
-    if(equipe1==NULL){
-    printf("erreur\n");
-    exit(1);
-    }
-    
-    Champion*equipe2=malloc(sizeof(Champion)*3);
-    if(equipe2==NULL){
-    printf("erreur\n");
-    exit(1);
-    }
-    
-selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2);
-  combat3v3(tous_les_champions,nb_champions,equipe1,equipe2);
-  
-   
-   
-
-    free(tous_les_champions);
-    free(equipe1);
-    free(equipe2);
-    return 0;
-    }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#define RESET   "\033[0m"
-#define RED     "\033[0;31m"
-#define GREEN   "\033[0;32m"
-#define ORANGE  "\033[38;5;208m"
-
-typedef enum {
-    tank, assassin, soutien
-} Type;
-
-typedef struct {
-    char nom[30];
-    int degats;
-} Attaque;
-
-typedef struct {
-    char nom[50];
-    char description[100];
-    float valeur;
-    char propriete[20];
-    char operation[10];
-    int tours_actifs;
-    int recharge_max;
-    int recharge_restante;
-} Technique;
-
-typedef struct {
-    char nom[50];
-    int pvc;
-    int pvm;
-    float def;
-    float defmax;
-    float agl;
-    float vitess;
-    float vitessmax;
-    float barre_action;
-    Attaque att[2];
-    Type type;
-    Technique technique;
-    int tours_effet_restant;
-} Champion;
-
-
-
-const char* lesroles(Type type) {
-    switch (type) {
-        case 0: return "tank";
-        case 1: return "assassin";
-        case 2: return "soutien";
-        default: return "inconnu";
-    }
-} 
-int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, int max) {
-    FILE *file = fopen("personnages.txt", "r");
-    if (file == NULL) {
-        printf("Erreur de lecture du fichier\n");
-        return 0; // Si le fichier n'est pas trouvé, on retourne 0 pour indiquer une erreur
-    }
-
-    int i = 0;
-    char typeStr[20];  // <- variable temporaire pour stocker le type sous forme de chaîne
-
-    while (fscanf(file, 
-                  "%s %d %d %f %f %d %f %f %f  %s %d %s %d %s %s %[^\n] %f %s %s %d %d\n ",
-          
-                  champions[i].nom, 
-                  &champions[i].pvc, &champions[i].pvm, &champions[i].def, &champions[i].defmax,
-                  &champions[i].agl, &champions[i].vitess, &champions[i].vitessmax, &champions[i].barre_action,
-                  champions[i].att[0].nom, &champions[i].att[0].degats, 
-                  champions[i].att[1].nom, &champions[i].att[1].degats, 
-                  typeStr, // <- on lit ici dans la variable temporaire
-                  champions[i].technique.nom, champions[i].technique.description, 
-                  &champions[i].technique.valeur, champions[i].technique.propriete, 
-                  champions[i].technique.operation, &champions[i].technique.tours_actifs, 
-                  &champions[i].technique.recharge_max) != EOF) {
-        
-        // Conversion de typeStr en enum Type
-        if (strcmp(typeStr, "tank") == 0) {
-            champions[i].type = tank;
-        } else if (strcmp(typeStr, "assassin") == 0) {
+        else if (strcmp(typeStr, "assassin") == 0) {
             champions[i].type = assassin;
-        } else if (strcmp(typeStr, "soutien") == 0) {
+        }
+         else if (strcmp(typeStr, "soutien") == 0) {
             champions[i].type = soutien;
-        } else {
+        }
+         else {
             champions[i].type = tank; // valeur par défaut en cas d'erreur
         }
 
         i++;
-        if (i >= max) break; // On s'assure de ne pas dépasser le nombre maximal de champions
+        if (i >= max){
+         break; // On s'assure de ne pas dépasser le nombre maximal de champions
     }
-
+}
     fclose(file);
     return i;
 }
@@ -1193,18 +140,25 @@ void afficherBarreDeVie(int pvact, int pvmax) {
     float ratio = (float)pvact / pvmax;
 
     const char *couleur;
-    if (ratio > 0.6) couleur = GREEN;
-    else if (ratio > 0.3) couleur = ORANGE;
-    else couleur = RED;
-
+    if (ratio > 0.6){
+     couleur = GREEN;
+     	}
+    else if (ratio > 0.3){
+     couleur = ORANGE;
+     	}
+    else{
+     couleur = RED;
+	}
     printf("[");
     for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
+        if (i < nbBlocs){
             printf("%s█", couleur);
-        else
+            }
+        else{
             printf("%s ", RESET);
+            }
     }
-    printf("%s] %d/%d PV\n", RESET, pvact, pvmax);
+    printf("%s] %d/%d PV  ", RESET, pvact, pvmax);
 }
 
 
@@ -1215,28 +169,25 @@ void afficherBarreDeVitesse(float barre_action) {
 
     printf("[");
     for (int i = 0; i < longueurBarre; i++) {
-        if (i < nbBlocs)
+        if (i < nbBlocs){
             printf("%s█", GREEN);
-        else
+            }
+        else{
             printf("%s ", RESET);
+            }
     }
     printf("] %.2f/100 Vitesse\n", barre_action);
 }
 
 
 
-void afficherVie(Champion p1, Champion p2) {
-    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
+void afficherVie(Champion p1) {
+    
     printf("%s : ", p1.nom);
     afficherBarreDeVie(p1.pvc, p1.pvm);
     afficherBarreDeVitesse(p1.barre_action);
-
-    printf("%s : ", p2.nom);
-    afficherBarreDeVie(p2.pvc, p2.pvm);
-    afficherBarreDeVitesse(p2.barre_action);
-    printf("\n");
 }
-
+   
 
 int esquive(int chance) {
     return (rand() % 101) > chance;
@@ -1249,10 +200,11 @@ void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
     } else {
         printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
         cible->pvc -= (a.degats - cible->def);
-        if (cible->pvc < 0) cible->pvc = 0;
+        if (cible->pvc < 0){
+         cible->pvc = 0;
     }
 }
-
+}
 
 
 
@@ -1270,8 +222,9 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
      if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs == 0) {
         if (strcmp(tech->operation, "add") == 0) {
             utilisateur->pvc += tech->valeur;
-            if (utilisateur->pvc > utilisateur->pvm)
+            if (utilisateur->pvc > utilisateur->pvm){
                 utilisateur->pvc = utilisateur->pvm;
+             }
             printf("%s récupère %.0f PV !\n", utilisateur->nom, tech->valeur);
         }
         else {
@@ -1335,24 +288,26 @@ void soigner(Champion* c) {
 }
 
 void combat(Champion* perso1, Champion* perso2) {
+afficherVie(*perso2);
+printf("\n");
     int choix;
     printf("\n");
 
     for (int i = 0; i < 2; i++) {
         printf("%d - %s (dégâts : %d)\n", i + 1, perso1->att[i].nom, perso1->att[i].degats);
     }
-    if (perso1->type == soutien) printf("3 - Se soigner\n");
-    if (perso1->technique.recharge_restante == 0) printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
-    
+    	if (perso1->type == soutien){
+    	 printf("3 - Se soigner\n");
+    	 }
+   	if (perso1->technique.recharge_restante == 0){
+   	 printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
+    	}
     
     printf("\n");
     printf("Choisis une action : ");
     printf("\n");
     
-if (!lireEntier(&choix)) {
-    printf("Entrée invalide, veuillez entrer un nombre.\n");
-    continue; // ou return, selon le contexte
-}
+scanf("%d",&choix);
 
     printf("\n");
 
@@ -1381,7 +336,7 @@ if (!lireEntier(&choix)) {
     
  
     if (perso1->tours_effet_restant > 0) {
-    perso1->tours_effet_restant--;
+    	perso1->tours_effet_restant--;
     }
     if (perso1->tours_effet_restant == 0) {
         // Rétablir la vitesse après la fin de l'effet
@@ -1394,18 +349,23 @@ if (!lireEntier(&choix)) {
                 perso1->def = perso1->defmax;
                 printf("L'effet de defense sur %s est terminé, defense rétablie.\n", perso1->nom);
             
-    }
+    	}
     
     }
     
     
     
     
-    if (perso2->tours_effet_restant > 0) perso2->tours_effet_restant--;
-    if (perso1->technique.recharge_restante > 0) perso1->technique.recharge_restante--;
+    if (perso2->tours_effet_restant > 0){
+    	perso2->tours_effet_restant--;
+    	}
+    if (perso1->technique.recharge_restante > 0){
+     	perso1->technique.recharge_restante--;
     
-}
+     }
+    
 
+}
 Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* attaquant) {
     int choix;
     
@@ -1416,17 +376,16 @@ Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* a
         printf("%d - %s (%d PV)\n", i + 1, options[i]->nom, options[i]->pvc);
     }
 
-if (!lireEntier(&choix)) {
-    printf("Entrée invalide, veuillez entrer un nombre.\n");
-    continue; // ou return, selon le contexte
-}
+scanf("%d",&choix);
 
     if (choix < 1 || choix > 3 || options[choix - 1]->pvc==0) {
         printf("Choix invalide ! Tour perdu.\n");
         return NULL;
     }
     printf("\n%s attaque %s !\n", attaquant->nom, options[choix - 1]->nom);
+     printf("\n");
     combat(attaquant, options[choix - 1]);
+    
     
     
     return options[choix - 1];
@@ -1441,13 +400,17 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
    
     
     printf("\n--- Équipe 1 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(&equipe1[i], i + 1);
-
+    for (int i = 0; i < 3; i++){
+     afficherChampion(&equipe1[i], i + 1);
+	}
     printf("\n--- Équipe 2 ---\n");
-    for (int i = 0; i < 3; i++) afficherChampion(&equipe2[i], i + 1);
-
+    
+    for (int i = 0; i < 3; i++){
+     afficherChampion(&equipe2[i], i + 1);
+	}
     printf("\nLe combat commence !\n");
       printf("\n");
+      getchar();
     
     int equipe1vivants=3;
     int equipe2vivants=3;
@@ -1461,19 +424,52 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
    for(int j=0;j<3;j++){
        if(equipe1[j].barre_action>=100 && equipe1[j].pvc>0){
            equipe1[j].barre_action=100;
+           
+           sleep(2);
+                       
            printf("== Tour de %s ==\n", equipe1[j].nom);
-           getchar();
            cible=selectionnerCible(&equipe2[0],&equipe2[1],&equipe2[2], &equipe1[j]);
            equipe1[j].barre_action=0;
+           
+           printf("---ETAT DES COMBATTANTS---\n");
+           
+           for(int k=0;k<3;k++){
+           	afficherVie(equipe1[k]);
+           
+       		}
+       	printf("\n");
+       	
+       	   for(int k=0;k<3;k++){
+       	   	afficherVie(equipe2[k]);
+       	   	
+           }
+        printf("\n");
+       
        }
        if(equipe2[j].barre_action>=100 && equipe2[j].pvc>0){
            equipe2[j].barre_action=100;
+           
+           sleep(2);
            printf("== Tour de %s ==\n", equipe2[j].nom);
-             getchar();
+             
            cible=selectionnerCible(&equipe1[0],&equipe1[1],&equipe1[2],&equipe2[j]);
            equipe2[j].barre_action=0;
-       }
-       }
+           
+            printf("---ETAT DES COMBATTANTS---\n");
+            
+            
+           for(int k=0;k<3;k++){
+           	afficherVie(equipe1[k]);
+           		
+       		}
+       	   printf("\n");
+       	
+       	   for(int k=0;k<3;k++){
+       	   	afficherVie(equipe2[k]);
+       	   		
+           }
+           printf("\n");
+       
        equipe1vivants=0;
        equipe2vivants=0;
        
@@ -1485,6 +481,9 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                  equipe2vivants++;
             }
         
+   }
+   
+   }
    }
     if (equipe1vivants == 0) {
             printf("Après une bataille épique,l'équipe 2 remporte la victoire !\n");
@@ -1593,4 +592,3 @@ selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2);
     free(equipe2);
     return 0;
     }
-    
