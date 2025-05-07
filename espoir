@@ -1,3 +1,18 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -64,8 +79,8 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     char typeStr[20];  // <- variable temporaire pour stocker le type sous forme de chaîne
 
     while (fscanf(file, 
-                  "%s %d %d %f %f %d %f %f %f  %s %d %s %d %s %s %[^\n] %f %s %s %d %d\n ",
-          
+                  "%s %d %d %f %f %d %f %f %f %s %d %s %d %s %s %s %f %s %s %d %d\n",
+        
                   champions[i].nom, 
                   &champions[i].pvc, &champions[i].pvm, &champions[i].def, &champions[i].defmax,
                   &champions[i].agl, &champions[i].vitess, &champions[i].vitessmax, &champions[i].barre_action,
@@ -95,7 +110,7 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
         if (i >= max){
          break; // On s'assure de ne pas dépasser le nombre maximal de champions
     }
-
+}
     fclose(file);
     return i;
 }
@@ -157,7 +172,7 @@ void afficherBarreDeVie(int pvact, int pvmax) {
             printf("%s ", RESET);
             }
     }
-    printf("%s] %d/%d PV\n", RESET, pvact, pvmax);
+    printf("%s] %d/%d PV  ", RESET, pvact, pvmax);
 }
 
 
@@ -180,18 +195,13 @@ void afficherBarreDeVitesse(float barre_action) {
 
 
 
-void afficherVie(Champion p1, Champion p2) {
-    printf("\n--- ÉTAT DES COMBATTANTS ---\n");
+void afficherVie(Champion p1) {
+    
     printf("%s : ", p1.nom);
     afficherBarreDeVie(p1.pvc, p1.pvm);
     afficherBarreDeVitesse(p1.barre_action);
-
-    printf("%s : ", p2.nom);
-    afficherBarreDeVie(p2.pvc, p2.pvm);
-    afficherBarreDeVitesse(p2.barre_action);
-    printf("\n");
 }
-
+   
 
 int esquive(int chance) {
     return (rand() % 101) > chance;
@@ -204,10 +214,11 @@ void utiliserAttaque(Champion *attaquant, Champion *cible, Attaque a) {
     } else {
         printf("%s utilise %s et inflige %d dégâts à %s !\n", attaquant->nom, a.nom, a.degats, cible->nom);
         cible->pvc -= (a.degats - cible->def);
-        if (cible->pvc < 0) cible->pvc = 0;
+        if (cible->pvc < 0){
+         cible->pvc = 0;
     }
 }
-
+}
 
 
 
@@ -291,7 +302,8 @@ void soigner(Champion* c) {
 }
 
 void combat(Champion* perso1, Champion* perso2) {
-afficherVie(*perso1,*perso2);
+afficherVie(*perso2);
+printf("\n");
     int choix;
     printf("\n");
 
@@ -351,7 +363,7 @@ scanf("%d",&choix);
                 perso1->def = perso1->defmax;
                 printf("L'effet de defense sur %s est terminé, defense rétablie.\n", perso1->nom);
             
-    }
+    	}
     
     }
     
@@ -360,11 +372,14 @@ scanf("%d",&choix);
     
     if (perso2->tours_effet_restant > 0){
     	perso2->tours_effet_restant--;
+    	}
     if (perso1->technique.recharge_restante > 0){
      	perso1->technique.recharge_restante--;
     
-}
+     }
+    
 
+}
 Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* attaquant) {
     int choix;
     
@@ -383,6 +398,7 @@ scanf("%d",&choix);
     }
     printf("\n%s attaque %s !\n", attaquant->nom, options[choix - 1]->nom);
     combat(attaquant, options[choix - 1]);
+    
     
     
     return options[choix - 1];
@@ -425,6 +441,21 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
             
            cible=selectionnerCible(&equipe2[0],&equipe2[1],&equipe2[2], &equipe1[j]);
            equipe1[j].barre_action=0;
+           
+           printf("---ETAT DES COMBATTANTS---\n");
+           
+           for(int k=0;k<3;k++){
+           	afficherVie(equipe1[k]);
+           
+       		}
+       	printf("\n");
+       	
+       	   for(int k=0;k<3;k++){
+       	   	afficherVie(equipe2[k]);
+       	   	
+           }
+        printf("\n");
+       
        }
        if(equipe2[j].barre_action>=100 && equipe2[j].pvc>0){
            equipe2[j].barre_action=100;
@@ -433,8 +464,22 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
              
            cible=selectionnerCible(&equipe1[0],&equipe1[1],&equipe1[2],&equipe2[j]);
            equipe2[j].barre_action=0;
+           
+            printf("---ETAT DES COMBATTANTS---\n");
+            
+            
+           for(int k=0;k<3;k++){
+           	afficherVie(equipe1[k]);
+           		
        		}
-       }
+       	   printf("\n");
+       	
+       	   for(int k=0;k<3;k++){
+       	   	afficherVie(equipe2[k]);
+       	   		
+           }
+           printf("\n");
+       
        equipe1vivants=0;
        equipe2vivants=0;
        
@@ -446,6 +491,9 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                  equipe2vivants++;
             }
         
+   }
+   
+   }
    }
     if (equipe1vivants == 0) {
             printf("Après une bataille épique,l'équipe 2 remporte la victoire !\n");
