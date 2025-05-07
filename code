@@ -7,7 +7,8 @@
 #define RED     "\033[0;31m"
 #define GREEN   "\033[0;32m"
 #define ORANGE  "\033[38;5;208m"
-
+#include <errno.h>
+#define SIZE 5000
 typedef enum {
     tank, assassin, soutien
 } Type;
@@ -392,7 +393,23 @@ scanf("%d",&choix);
 }
 
 
-
+void debutc(){
+	FILE *fichier=fopen("debutcombat.txt","r");
+	if(fichier==NULL){
+	printf("ERREUR 'affiche_debutcombat':%d\n",errno);
+	printf("Message d'erreur:%s\n",strerror(errno));
+	exit(11);
+	}
+	int c=fgetc(fichier);
+	
+	while(c!=EOF){
+	
+	printf("%c",c);
+	c=fgetc(fichier);
+	}
+	fclose(fichier);
+	
+}
 
 void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2,char* nomEquipe1,char* nomEquipe2) {
    
@@ -408,7 +425,8 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
     for (int i = 0; i < 3; i++){
      afficherChampion(&equipe2[i], i + 1);
 	}
-    printf("\nLe combat commence !\n");
+  //  printf("\nLe combat commence !\n");
+      debutc();
       printf("\n");
       getchar();
     
@@ -556,8 +574,8 @@ if (!lireEntier(&choix)) {
 
 
 int main() {
-    char nomEquipe1[5000];
-    char nomEquipe2[5000];
+    char nomEquipe1[SIZE];
+    char nomEquipe2[SIZE];
     printf("Entrez le nom de la première équipe : ");
     fgets(nomEquipe1, sizeof(nomEquipe1), stdin);
     
