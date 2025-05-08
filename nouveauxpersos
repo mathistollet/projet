@@ -667,6 +667,10 @@ do {
     printf("1. Lancer le combat\n");
     printf("2. Ajouter un personnage\n");
     scanf("%d", &choix);
+while (choix!=1 && choix!=2) {
+            printf("choix incorrect\n");
+                scanf("%d",&choix);
+    }
 
     switch (choix) {
         case 1:
@@ -705,6 +709,7 @@ selectionnerpersos(tous_les_champions,nb_champions,equipe1,equipe2,nomEquipe1,no
             ajouter_personnage("personnages.txt");
             b++;
             break;
+
     }
 } while (choix != 1);
     
