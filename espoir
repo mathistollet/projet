@@ -120,7 +120,7 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
 
 
 void afficherChampion( Champion* c, int index) {
-    printf("%d - %s [Type: %d, PV: %d, Déf: %.1f, Vit: %.1f]\n",
+    printf("%d - %s [Type: %s, PV: %d, Déf: %.1f, Vit: %.1f]\n",
            index, c->nom, c->type, c->pvm, c->def, c->vitess);
 }
 
