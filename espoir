@@ -381,14 +381,15 @@ Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* a
 scanf("%d",&choix);
 
     if (choix < 1 || choix > 3 || options[choix - 1]->pvc==0) {
-        printf("Choix invalide ! Tour perdu.\n");
-        return NULL;
+       	 printf("Choix invalide ! Tour perdu.\n");
+       		 return NULL;
     }
     printf("\n%s attaque %s !\n", attaquant->nom, options[choix - 1]->nom);
      printf("\n");
     combat(attaquant, options[choix - 1]);
-    
-    
+    	if(options[choix - 1]->pvc==0){
+		printf("%s est ko!\n",options[choix - 1]->nom);
+    		}
     
     return options[choix - 1];
 }
