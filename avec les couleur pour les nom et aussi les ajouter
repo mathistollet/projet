@@ -1,6 +1,3 @@
-
-
-
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -51,18 +48,20 @@ typedef struct {
 
 
 
-const char *lesroles(Type type) {
+const char* lesroles(Type type) {
     switch (type) {
         case 0: return "tank";
         case 1: return "assassin";
         case 2: return "soutien";
-        default: return "inconnue";
+        default: return "inconnu";
     }
 } 
+
 
 void printCouleur(const char *texte, const char *couleur) {
     printf("%s%s\033[0m", couleur, texte);
 }
+
 
 
 int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, int max) {
@@ -73,7 +72,7 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     }
 
     int i = 0;
- 
+
 
     while (fscanf(file, 
                   "%s %d %d %f %f %d %f %f %f %s %d %s %d %d %s %s %f %s %s %d %d\n",
@@ -83,13 +82,15 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
                   &champions[i].agl, &champions[i].vitess, &champions[i].vitessmax, &champions[i].barre_action,
                   champions[i].att[0].nom, &champions[i].att[0].degats, 
                   champions[i].att[1].nom, &champions[i].att[1].degats, 
-                  &champions[i].type, 
+                  &champions[i].type, // <- on lit ici dans la variable temporaire
                   champions[i].technique.nom, champions[i].technique.description, 
                   &champions[i].technique.valeur, champions[i].technique.propriete, 
                   champions[i].technique.operation, &champions[i].technique.tours_actifs, 
                   &champions[i].technique.recharge_max) != EOF) {
         
-        
+        // Conversion de typeStr en enum Type
+
+
         i++;
         if (i >= max){
          break; // On s'assure de ne pas dépasser le nombre maximal de champions
@@ -110,7 +111,7 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
         }
         return 1;  // Succès
     }
-    return 0; // Erreur de lecture
+    return 0; // Erreur de lecture 
 }
 
 
@@ -413,6 +414,8 @@ void debutc(){
 
 
 
+
+   
 void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2,char* nomEquipe1,char* nomEquipe2) {
    
 
@@ -532,7 +535,9 @@ void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*e
  int choix;
  int totalchoix=0;
  while(totalchoix<6){
- 		if(totalchoix%2==0){
+ 
+ 
+ if(totalchoix%2==0){
                        printf("Choix de ",nomEquipe1);
                        printCouleur(nomEquipe1, "\033[0;34m");
                        printf("\n");
@@ -543,19 +548,24 @@ void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*e
                        printCouleur(nomEquipe2, "\033[0;31m");
                        printf("\n ");
                }
+ 		
  for (int i = 0; i < nb_champions; i++) {
  
             if (!estDejaChoisi(equipe1, 3, &tous_les_champions[i]) && !estDejaChoisi(equipe2, 3, &tous_les_champions[i])) {
         	afficherChampion(&tous_les_champions[i], i + 1);
-   	 }
+    }
         }
          printf("\n");
          
          
-	if (!lireEntier(&choix)) {
-   		 printf("Entrée invalide, veuillez entrer un nombre.\n");
-    		continue; // ou return, selon le contexte
-	}
+
+
+
+
+if (!lireEntier(&choix)) {
+    printf("Entrée invalide, veuillez entrer un nombre.\n");
+    continue; // ou return, selon le contexte
+}
 
 
          printf("\n");
@@ -564,7 +574,6 @@ void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*e
             printf("Choix invalide ou déjà pris. Réessayez.\n");
             continue;
            }
-           
            
            
                if(totalchoix%2==0){
@@ -588,6 +597,7 @@ void ajouter_personnage(const char* personnages) {
     }
 
     Champion p;
+    char typeStr[20]; 
 
     printf("Nom : ");
     scanf("%s", p.nom);
@@ -596,15 +606,16 @@ void ajouter_personnage(const char* personnages) {
     scanf("%d", &p.pvm);
     p.pvc = p.pvm;
 
-    printf("DEF / VIT : ");
-    scanf("%f %f", &p.def, &p.vitess);
+    printf("  DEF / VIT : ");
+    scanf(" %f %f",  &p.def, &p.vitess);
     p.defmax = p.def;
     p.vitessmax = p.vitess;
     p.barre_action = 0;
-
-    printf("agilité : ");
+    
+    printf("quelle est son agilité : ");
     scanf("%f",&p.agl);
     
+
     printf("Nom attaque 1 et dégâts : ");
     scanf("%s %d", p.att[0].nom, &p.att[0].degats);
 
@@ -613,7 +624,6 @@ void ajouter_personnage(const char* personnages) {
 
     printf("Rôle (tank/assassin/soutien) : ");
     scanf("%d", &p.type);
-    
 
     printf("Nom technique spéciale : ");
     scanf("%s", p.technique.nom);
@@ -624,7 +634,7 @@ void ajouter_personnage(const char* personnages) {
     printf("Valeur effet (float ou int selon le type) : ");
     scanf("%f", &p.technique.valeur);
     
-     printf("propriéte : ");
+    printf("quelle est sa propriete?(def,vitess,pvc)");
     scanf("%s",p.technique.propriete);
 
     printf("Type effet (add, mul, sub, div) : ");
@@ -636,20 +646,20 @@ void ajouter_personnage(const char* personnages) {
     printf("Temps de recharge : ");
     scanf("%d", &p.technique.recharge_max);
 
+    
+  
 
-    fprintf(file, "%s %d %d %f %f %.1f %.1f %.1f %.1f %s %d %s %d %d %s %s %.1f %s %s %d %d\n",
+    fprintf(file, "%s %d %d %1f %1f %1f %1f %1f %1f %s %d %s %d %d %s %s %.1f %s %s %d %d\n",
         p.nom, p.pvc, p.pvm, p.def, p.defmax, p.agl,
         p.vitess, p.vitessmax, p.barre_action,
         p.att[0].nom, p.att[0].degats, p.att[1].nom, p.att[1].degats,
-        p.type, p.technique.nom, p.technique.description, p.technique.valeur,
+       p.type, p.technique.nom, p.technique.description, p.technique.valeur,
         p.technique.propriete, p.technique.operation,
         p.technique.tours_actifs, p.technique.recharge_max);
 
     fclose(file);
     printf("Personnage ajouté avec succès !\n");
 }
-
-
 
 
 
