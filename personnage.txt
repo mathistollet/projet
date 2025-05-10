@@ -1,8 +1,0 @@
-sedarp 400 400 20 20 10 4 4 0 Marteau_écrasant 40 Ruée 30 tank Mur_d_acier doubble_la_defense_pendant_2_tours 2.0 def mul 2 4
-cleo 420 420 25 25 5 3.5 3.5 0 Coup_de_lame 35 Provocation 20 tank Renforcement Augmente_la_défense_de_50%_pendant_3_tours 1.5 def mul 3 3
-Ombrenoire 260 260 5 5 35 9 9 0 Lame_fantôme 60 Coup_critique 80 assassin Danse_de_l_ombre Double_la_vitesse_pendant_1_tour 2.0 vitess mul 1 3
-Dacam 280 280 8 8 301 8 8 0 Morsure_toxique 45 paroles_empoisonnées 35 assassin Venin_mortel Réduit_les_PV_de_l'ennemi_de_20_pendant_3_tours 20 pvc sub 3 4
-guérisseuse 300 300 10 10 15 5.5 5.5 0 Frappe_lumineuse 30 Onde_curative 20 soutien Lumière_divine Rend_60_PV_immédiatement 60.0 pvc add 0 3
-Sérénia 310 310 12 12 10 5 5 0 Souffle_apaisant 25 Chant_de_paix 20 soutien Bénédiction Augmente_la_vitesse_de_30%_pendant_2_tours 1.3 vitess mul 2 3
-
-
