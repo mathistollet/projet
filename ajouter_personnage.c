@@ -100,7 +100,7 @@ void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*e
  
  
  if(totalchoix%2==0){
-                       printf("Choix de ",);
+                       printf("Choix de ");
                        printCouleur(nomEquipe1, "\033[0;34m");
                        printf("\n");
                } 
