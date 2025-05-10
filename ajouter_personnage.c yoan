@@ -117,10 +117,6 @@ void ajouter_personnage(const char* personnages) {
 
     void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*equipe1,Champion*equipe2,char* nomEquipe1,char* nomEquipe2){
         printf("=== SELECTION DES EQUIPES ===\n");
-        for (int i = 0; i < 3; i++) {
-            equipe1[i].nom[0] = '\0';
-            equipe2[i].nom[0] = '\0';
-        }
         int choix;
         int totalchoix=0;
         vider();
