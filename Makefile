@@ -15,6 +15,8 @@ combat.o: combat.c projet.h
 art.o: art.c projet.h
 	gcc -c art.c -o art.o
 
+utiliserTechnique.o: utiliserTechnique
+
 projet.exe: main.o affichage.o ajouter_personnage.o combat.o art.o
 	gcc main.o affichage.o ajouter_personnage.o combat.o art.o -o projet.exe
 
