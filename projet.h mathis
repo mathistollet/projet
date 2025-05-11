@@ -50,7 +50,7 @@ typedef struct {
 
 
 
-
+void vider();
 void debutc();
 void rayman();
 void boo();
@@ -62,6 +62,7 @@ void yoda();
 void yoshi();
 void cible();
 void vs();
+void vider();
 void printCouleur(const char *texte, const char *couleur);
 int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, int max);
 int lireEntier(int *valeur);
@@ -79,4 +80,3 @@ Champion* selectionnerCible(Champion* c1, Champion* c2, Champion* c3,Champion* a
 void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Champion* equipe2,char* nomEquipe1,char* nomEquipe2);
 void selectionnerpersos(Champion *tous_les_champions,int nb_champions,Champion*equipe1,Champion*equipe2,char* nomEquipe1,char* nomEquipe2);
 void ajouter_personnage(const char* personnages);
-void viderBuffer();
