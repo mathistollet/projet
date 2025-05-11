@@ -1,0 +1,35 @@
+Introduction
+
+Le projet CY-Fighter consiste en la création d’un jeu de combat au tour par tour mettant en scène plusieurs personnages dotés de caractéristiques spécifiques. La gestion de la vitesse a représenté la difficulté principale, car elle devait définir l’ordre d’action des personnages pendant les affrontements. Sa mise en œuvre a nécessité une organisation rigoureuse du système de jeu.
+Conception des structures de base
+
+La première étape a consisté à concevoir les structures des combattants en y intégrant les caractéristiques fondamentales suivantes : attaque, défense et vitesse. Certaines propriétés ont été définies comme constantes, telles que le nombre maximal de points de vie (PV). Par exemple, une attaque spéciale permet de récupérer 40 PV, sans toutefois dépasser le seuil maximal autorisé.
+Mise en place du combat en 1 contre 1
+
+Une fois les structures terminées, le développement du système de combat en un contre un a été engagé. Chaque fonctionnalité principale a été prise en charge séparément, avec notamment la création des fonctions d’attaque, d’esquive et de défense.
+
+L’ajout du système de sélection d’attaque a constitué une étape importante. Malgré quelques difficultés techniques initiales, le système a été stabilisé. À ce stade, le combat en 1c1 était pleinement fonctionnel.
+Passage au mode 3 contre 3
+
+La transition vers un système de combat en 3 contre 3 a représenté un défi majeur. Ce mode nécessitait la gestion de six personnages possédant des caractéristiques différentes, la sélection d’une cible dans l’équipe adverse, ainsi que la prise en compte de la vitesse pour définir l’ordre des tours.
+
+Avant de pouvoir lancer un combat 3c3, une phase de sélection des personnages devait être implémentée. Cette étape consistait à charger les personnages depuis un fichier texte, à les afficher à l’utilisateur, puis à les retirer du choix une fois sélectionnés. La validation de cette étape a représenté une avancée technique significative.
+Ajout de personnages personnalisés
+
+Une fois le système de combat et la sélection en place, une nouvelle fonctionnalité a été ajoutée : la création personnalisée de personnages. Cette fonction permet à l’utilisateur d’ajouter ses propres combattants au fichier texte du jeu, afin de pouvoir les sélectionner dans les futurs combats.
+
+La mise en œuvre de cette fonctionnalité a exigé de nombreuses vérifications, notamment pour bloquer les saisies incorrectes et forcer le respect des formats et valeurs autorisées. Il a été nécessaire de concevoir plusieurs fonctions pour assurer la fiabilité du processus, ce qui a entraîné une succession de tests et de corrections de bugs.
+Intégration des éléments graphiques
+
+La dernière phase du projet a concerné l’aspect visuel du jeu. Des éléments graphiques ont été ajoutés pour améliorer l’expérience utilisateur, notamment :
+
+    La représentation visuelle des personnages
+
+    Les barres de vie
+
+    Les barres de vitesse
+
+Cette étape, plus accessible, a permis d’apporter une dimension visuelle satisfaisante au projet. Chaque membre a pu se concentrer sur un aspect : création graphique des personnages pour l’un, gestion des animations et des temps d’attente pour l’autre.
+Conclusion
+
+Le projet CY-Fighter a permis la conception d’un jeu de combat complet, incluant la gestion d’un combat 3c3, la création dynamique de personnages, ainsi que l’intégration d’éléments visuels interactifs. Les défis techniques rencontrés ont favorisé l’apprentissage de nombreuses compétences, tant en programmation qu’en structuration de projet. Le résultat final est un jeu fonctionnel, personnalisable et visuellement attractif.
