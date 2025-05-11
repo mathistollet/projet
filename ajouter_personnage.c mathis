@@ -15,7 +15,7 @@ void ajouter_personnage(const char* personnages) {
 
     printf("Nom : ");
     scanf("%s", p.nom);
-    viderBuffer();
+    vider();
 
 
     printf("PV max : ");
@@ -55,7 +55,7 @@ void ajouter_personnage(const char* personnages) {
         printf("Nom attaque 1(pas d'espaces) et dégâts (entre 0 et 500): ");
 
         scanf("%s %d", p.att[0].nom, &p.att[0].degats);
-        viderBuffer();
+        vider();
     while (p.att[0].degats<0||p.att[0].degats>500) {
         printf("erreur,reessayez\n");
     }
@@ -66,7 +66,7 @@ void ajouter_personnage(const char* personnages) {
     printf("Nom attaque 2(pas d'espaces) et dégâts (entre 0 et 500): ");
 
     scanf("%s %d", p.att[1].nom, &p.att[1].degats);
-        viderBuffer();
+        vider();
     while (p.att[0].degats<0||p.att[0].degats>500) {
         printf("erreur,reessayez\n");
     }
@@ -86,13 +86,13 @@ void ajouter_personnage(const char* personnages) {
         printf("Nom technique spéciale : ");
         scanf("%s", p.technique.nom);
 
-        viderBuffer();
+        vider();
 
 
 
     printf("Effet (sans espaces, utilisez _ à la place) : ");
     scanf("%s", p.technique.description);
-    viderBuffer();
+    vider();
 
 
 
