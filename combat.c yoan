@@ -179,39 +179,70 @@ void combat(Champion* perso1, Champion* perso2) {
     }
     if (perso1->type == soutien){
         printf("3 - Se soigner\n");
-    }
-    
-    if (perso1->technique.recharge_restante == 0){
-        printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
-    }
 
-    printf("\n");
-    printf("Choisis une action : ");
-    printf("\n");
-
-    scanf("%d",&choix);
-
-    printf("\n");
-
-    if (choix >= 1 && choix <= 2) {
-        utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+        if (perso1->technique.recharge_restante == 0){
+            printf("4 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
+        }
         printf("\n");
+        printf("Choisis une action : ");
+        printf("\n");
+
+        scanf("%d",&choix);
+
+        printf("\n");
+
+        if (choix >= 1 && choix <= 2) {
+            utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+            printf("\n");
+        }
+
+        else if (choix == 3 && perso1->type == soutien) {
+            soigner(perso1);
+            printf("\n");
+        }
+
+        else if (choix == 4 && perso1->technique.recharge_restante == 0) {
+            utiliserTechnique(perso1, perso2);
+            printf("\n");
+        }
+
+        else {
+            printf("Choix invalide, tour perdu !\n");
+            printf("\n");
+        }
     }
 
-    else if (choix == 3 && perso1->type == soutien) {
-        soigner(perso1);
+
+
+    if(perso1->type != soutien){
+        if (perso1->technique.recharge_restante == 0){
+            printf("3 - Technique spéciale : %s (%s)\n", perso1->technique.nom,perso1->technique.description);
+        }
         printf("\n");
+        printf("Choisis une action : ");
+        printf("\n");
+
+        scanf("%d",&choix);
+
+        printf("\n");
+
+        if (choix >= 1 && choix <= 2) {
+            utiliserAttaque(perso1, perso2, perso1->att[choix - 1]);
+            printf("\n");
+        }
+
+        else if (choix == 3 && perso1->technique.recharge_restante == 0) {
+            utiliserTechnique(perso1, perso2);
+            printf("\n");
+        }
+
+        else {
+            printf("Choix invalide, tour perdu !\n");
+            printf("\n");
+        }
+
     }
 
-    else if (choix == 4 && perso1->technique.recharge_restante == 0) {
-        utiliserTechnique(perso1, perso2);
-        printf("\n");
-    }
-
-    else {
-        printf("Choix invalide, tour perdu !\n");
-        printf("\n");
-    }
 
     // Gestion des effets et recharges
 
