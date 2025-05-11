@@ -273,5 +273,5 @@ void ajouter_personnage(const char* personnages) {
             }
         }
         return 0;
-}
+    }
     
