@@ -52,29 +52,42 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 else if(j==2){
                     groot();
                 }
-                sleep(2);
+                sleep(1);
 
                 cible=selectionnerCible(&equipe2[0],&equipe2[1],&equipe2[2], &equipe1[j]);
                 equipe1[j].barre_action=0;
 
 
                 printf("---ETAT DES COMBATTANTS---\n");
+                printf("\n");
                 printf("equipe ");
                 printCouleur(nomEquipe1, "\033[0;34m");
                 printf("\n");
                 for(int k=0;k<3;k++){
                     afficherVie(equipe1[k]);
+                    printf(" ");
+                    if (equipe1[k].tours_effet_restant!=0 ){
+                        printf("effet restant encore %d tour",equipe1[k].tours_effet_restant);
+                    }
 
+                    printf("\n");
                 }
                 printf("\n");
+
                 vs();
+
                 printf("\n");
                 printf("equipe ");
                 printCouleur(nomEquipe2, "\033[0;31m");
                 printf("\n ");
                 for(int k=0;k<3;k++){
                     afficherVie(equipe2[k]);
+                    printf(" ");
+                    if (equipe2[k].tours_effet_restant!=0 ){
+                        printf("effet restant encore %d tour",equipe2[k].tours_effet_restant);
+                    }
 
+                    printf("\n");
                 }
                 printf("\n");
                 printf("appuyez sur une touche puis entrer pour continuer le combat\n");
@@ -95,7 +108,7 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 else{
                     toad();
                 }
-                sleep(2);
+                sleep(1);
 
                 cible=selectionnerCible(&equipe1[0],&equipe1[1],&equipe1[2],&equipe2[j]);
                 equipe2[j].barre_action=0;
@@ -107,17 +120,30 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
 
                 for(int k=0;k<3;k++){
                     afficherVie(equipe1[k]);
+                    printf(" ");
+                    if (equipe1[k].tours_effet_restant!=0 ){
+                        printf("effet restant encore %d tour",equipe1[k].tours_effet_restant);
+                    }
 
+                    printf("\n");
                 }
+
                 printf("\n");
+
                 vs();
+
                 printf("\n");
                 printf("equipe ");
                 printCouleur(nomEquipe2, "\033[0;31m");
                 printf("\n ");
                 for(int k=0;k<3;k++){
                     afficherVie(equipe2[k]);
+                    printf(" ");
+                    if (equipe2[k].tours_effet_restant!=0 ){
+                        printf("effet restant encore %d tour",equipe2[k].tours_effet_restant);
+                    }
 
+                    printf("\n");
                 }
                 printf("\n");
                 printf("appuyer sur entrer pour passer...\n");
@@ -370,6 +396,51 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
         }
 
     }
+
+
+    if (strcmp(tech->propriete, "pvc") == 0 && tech->tours_actifs > 0) {
+        if (strcmp(tech->operation, "add") == 0) {
+            utilisateur->pvc += tech->valeur;
+            if (utilisateur->pvc>utilisateur->pvm) {
+                utilisateur->pvc = utilisateur->pvm;
+            }
+            cible->tours_effet_restant = tech->tours_actifs;
+            printf("%s récupère %.0f PV pendant encore %d tours !\n", utilisateur->nom, tech->valeur, tech->tours_actifs);
+        }
+        else if (strcmp(tech->operation, "sub") == 0) {
+            cible->pvc =cible->pvc-tech->valeur;
+
+            if (cible->pvc < 0){
+                cible->pvc = 0;
+            }
+            cible->tours_effet_restant = tech->tours_actifs;
+            printf("%s fais une attaque sur la durée (encore %d tours) et tape %s de  %.0f dégats !\n",utilisateur->nom, tech->tours_actifs,cible->nom, tech->valeur);
+
+        }
+
+        else if (strcmp(tech->operation, "div") == 0) {
+            cible->pvc =cible->pvc/tech->valeur;
+
+            if (cible->pvc < 0){
+                cible->pvc = 0;
+            }
+            cible->tours_effet_restant = tech->tours_actifs;
+            printf("%s fais une grosse attaque et tape %s de  %.0f dégats pendant encore %d !\n",utilisateur->nom, cible->nom, (cible->pvc*tech->valeur)-cible->pvc, tech->tours_actifs);
+
+        }
+        else if (strcmp(tech->operation, "mul") == 0) {
+            utilisateur->pvc = utilisateur->pvc* tech->valeur;
+            if (utilisateur->pvc>utilisateur->pvm) {
+                utilisateur->pvc = utilisateur->pvm;
+            }
+            cible->tours_effet_restant = tech->tours_actifs;
+            printf("%s récupère %.0f PV pendant %d tours !\n", utilisateur->nom, utilisateur->pvc-(utilisateur->pvc/tech->valeur),tech->tours_actifs);
+        }
+
+    }
+
+
+
 
     if (strcmp(tech->propriete, "vitess") == 0 && tech->tours_actifs > 0) {
         if (strcmp(tech->operation, "div") == 0) {
