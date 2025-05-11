@@ -1,5 +1,6 @@
 #include "projet.h"
 
+// Retourne une chaîne correspondant au rôle du champion selon sa valeur d'énumération
 const char* lesroles(Type type) {
     switch (type) {
         case 0: {
@@ -17,15 +18,18 @@ const char* lesroles(Type type) {
     }
 }
 
+// Affiche un résumé du champion (nom, type, PV, défense, vitesse)
 void afficherChampion(Champion* c, int index) {
     printf("%d - %s [Type: %s, PV: %d, Déf: %.1f, Vit: %.1f]\n",
            index, c->nom, lesroles(c->type), c->pvm, c->def, c->vitess);
 }
 
+// Affiche un texte avec une couleur ANSI donnée
 void printCouleur(const char *texte, const char *couleur) {
     printf("%s%s\033[0m", couleur, texte);
 }
 
+// Affiche une barre de vie colorée selon le ratio (vert > 60 %, orange > 30 %, rouge sinon)
 void afficherBarreDeVie(int pvact, int pvmax) {
     int longueurBarre = 20;
     int nbBlocs = (pvact * longueurBarre) / pvmax;
@@ -51,6 +55,7 @@ void afficherBarreDeVie(int pvact, int pvmax) {
     printf("%s] %d/%d PV  ", RESET, pvact, pvmax);
 }
 
+// Affiche une barre représentant l'avancement de la barre d'action (vitesse)
 void afficherBarreDeVitesse(float barre_action) {
     int longueurBarre = 20;
     int nbBlocs = (barre_action * longueurBarre) / 100;
@@ -66,12 +71,14 @@ void afficherBarreDeVitesse(float barre_action) {
     printf("] %.2f/100 Vitesse", barre_action);
 }
 
+// Affiche les barres de vie et de vitesse d’un champion
 void afficherVie(Champion p1) {
     printf("%s : ", p1.nom);
     afficherBarreDeVie(p1.pvc, p1.pvm);
     afficherBarreDeVitesse(p1.barre_action);
 }
 
+// Vérifie si une chaîne contient un espace
 int contientEspace(char* tab) {
     for (int i = 0; tab[i] != '\0'; i++) {
         if (tab[i] == ' ') {
@@ -81,6 +88,7 @@ int contientEspace(char* tab) {
     return 0;
 }
 
+// Vide le buffer d'entrée pour éviter les effets indésirables lors des saisies
 void vider() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {
