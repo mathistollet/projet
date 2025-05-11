@@ -5,7 +5,7 @@ main.o: main.c projet.h
 
 affichage.o: affichage.c projet.h
 	gcc -c affichage.c -o affichage.o
-	
+
 ajouter_personnage.o: ajouter_personnage.c projet.h
 	gcc -c ajouter_personnage.c -o ajouter_personnage.o
 
@@ -21,4 +21,3 @@ projet.exe: main.o affichage.o ajouter_personnage.o combat.o art.o
 clean:
 	rm -f *.o
 	rm -f projet.exe
-
