@@ -2,7 +2,7 @@ Rapport de Projet – Groupe J
 CY-Fighter : Développement d’un jeu de combat
 Introduction
 
-Le projet CY-Fighter est un jeu de combat au tour par tour que nous avons conçu et développé en équipe. Dès le départ, la caractéristique la plus complexe à mettre en œuvre a été la vitesse, car elle devait déterminer l’ordre d’action des combattants durant les affrontements. Cela a exigé une logique rigoureuse pour que les tours de jeu soient justes et dynamiques.
+Le projet CY-Fighter est un jeu de combat au tour par tour que nous avons conçu et développé . Dès le départ, la caractéristique la plus complexe à mettre en œuvre a été la vitesse, car elle devait déterminer l’ordre d’action des combattants durant les affrontements. Cela a exigé une logique rigoureuse pour que les tours de jeu soient justes et dynamiques.
 1. Conception initiale et structures
 
 Nous avons commencé par définir la structure des combattants, en intégrant des caractéristiques de base telles que :
