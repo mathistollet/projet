@@ -124,7 +124,7 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
 
                 vider();
                 getchar();
-                
+
 
                 equipe1vivants=0;
                 equipe2vivants=0;
@@ -143,12 +143,14 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
         }
 
         if (equipe1vivants == 0) {
-            printf("Après une bataille épique,l'équipe 2 remporte la victoire !\n");
-
+            printf("Après une bataille épique,l'équipe ");
+            printCouleur(nomEquipe1, "\033[0;34m");
+            printf("remporte la victoire !\n");
         }
         else if (equipe2vivants == 0) {
-            printf("Après une bataille épique,l'équipe 1 remporte la victoire !\n");
-
+            printf("Après une bataille épique,l'équipe ");
+            printCouleur(nomEquipe2, "\033[0;31m");
+            printf("remporte la victoire !\n");
         }
 
 
@@ -325,11 +327,11 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
             printf("%s fais une grosse attaque et tape %s de  %.0f dégats !\n",utilisateur->nom, cible->nom, (cible->pvc*tech->valeur)-cible->pvc);
 
         }
-       else if (strcmp(tech->operation, "mul") == 0) {
+        else if (strcmp(tech->operation, "mul") == 0) {
             utilisateur->pvc = utilisateur->pvc* tech->valeur;
-           if (utilisateur->pvc>utilisateur->pvm) {
-               utilisateur->pvc = utilisateur->pvm;
-           }
+            if (utilisateur->pvc>utilisateur->pvm) {
+                utilisateur->pvc = utilisateur->pvm;
+            }
 
             printf("%s récupère %.0f PV !\n", utilisateur->nom, utilisateur->pvc-(utilisateur->pvc/tech->valeur));
         }
@@ -395,11 +397,11 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
         }
 
 
-       else if (strcmp(tech->operation, "mul") == 0) {
+        else if (strcmp(tech->operation, "mul") == 0) {
             utilisateur->def = tech->valeur* utilisateur->def;
-           if (utilisateur->def>=80){
-               utilisateur->def= 80;
-           }
+            if (utilisateur->def>=80){
+                utilisateur->def= 80;
+            }
 
 
 
@@ -408,7 +410,7 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
         }
 
 
-       else if (strcmp(tech->operation, "sub") == 0) {
+        else if (strcmp(tech->operation, "sub") == 0) {
             cible->def = cible->def-tech->valeur;
 
             if (cible->def < 0) {
@@ -419,7 +421,7 @@ void utiliserTechnique(Champion *utilisateur, Champion *cible) {
         }
 
 
-       else if (strcmp(tech->operation, "add") == 0) {
+        else if (strcmp(tech->operation, "add") == 0) {
             utilisateur->def = utilisateur->def+tech->valeur;
 
             if (utilisateur->def > 80) {
