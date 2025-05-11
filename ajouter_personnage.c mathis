@@ -16,6 +16,7 @@ void ajouter_personnage(const char* personnages) {
     printf("Nom : ");
     scanf("%s", p.nom);
     vider();
+    printf("le nom de ton personnage est donc %s\n",p.nom);
 
 
     printf("PV max : ");
@@ -25,20 +26,20 @@ void ajouter_personnage(const char* personnages) {
         scanf("%d", &p.pvm);
 
     }
+    vider();
     p.pvc = p.pvm;
     printf("il aura donc %d PV\n",p.pvm);
 
 
 
     printf("DEF / VIT (entre 0 et 30 ) : ");
-    scanf(" %1f %1f",  &p.def, &p.vitess);
-
-
-
+    scanf(" %f %f",  &p.def, &p.vitess);
     while (p.def<0||p.def>30||p.vitess<=0||p.vitess>30) {
         printf("une ou plusieurs valeurs sont incorrects,reessayez \n");
         scanf("%f %f", &p.def,&p.vitess);
     }
+    vider();
+
     printf("il aura donc %.1f de defense et %.1f de vitesse\n",p.def,p.vitess);
     p.defmax = p.def;
     p.vitessmax = p.vitess;
@@ -51,28 +52,27 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%f",&p.agl);
     }
-
+    vider();
     printf("il aura donc %.1f d'agilité\n",p.agl);
 
 
 
     printf("Nom attaque 1(pas d'espaces) et dégâts (entre 0 et 500): ");
-
     scanf("%s %d", p.att[0].nom, &p.att[0].degats);
-    vider();
     while (p.att[0].degats<0||p.att[0].degats>500) {
         printf("erreur,reessayez\n");
     }
+    vider();
     printf("votre première attaque s'appelle %s et fait %d dégâts\n",p.att[0].nom, p.att[0].degats);
 
 
 
     printf("Nom attaque 2(pas d'espaces) et dégâts (entre 0 et 500): ");
     scanf("%s %d", p.att[1].nom, &p.att[1].degats);
-    vider();
     while (p.att[0].degats<0||p.att[0].degats>500) {
         printf("erreur,reessayez\n");
     }
+    vider();
     printf("votre deuxième attaque s'appelle %s et fait %d dégâts\n",p.att[1].nom, p.att[0].degats);
 
 
@@ -83,21 +83,21 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayer\n");
         scanf("%d",&p.type);
     }
-
+    vider();
 
 
 
     printf("Nom technique spéciale : ");
     scanf("%s", p.technique.nom);
-    printf("la technique speciale se nomme %s", p.technique.nom);
     vider();
+    printf("la technique speciale se nomme %s\n", p.technique.nom);
 
 
 
-    printf("Effet (sans espaces, utilisez _ à la place) : ");
+    printf("description de la technique special (sans espaces, utilisez _ à la place) : ");
     scanf("%s", p.technique.description);
     vider();
-
+    printf("sa description est donc %s\n",p.technique.description );
 
 
     printf("Valeur effet (entre 0 et 500) : ");
@@ -107,7 +107,7 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%f",&p.technique.valeur);
     }
-
+    vider();
 
 
 
@@ -117,6 +117,9 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%s",p.technique.propriete);
     }
+    vider();
+
+
 
     printf("Type effet (add, mul, sub, div) : ");
     scanf("%s", p.technique.operation);
@@ -124,6 +127,10 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%s",p.technique.operation);
     }
+    vider();
+
+
+
 
     printf("Durée (en tours) : ");
     scanf("%d", &p.technique.tours_actifs);
@@ -131,6 +138,8 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%d",&p.technique.tours_actifs);
     }
+    vider();
+
 
     printf("Temps de recharge : ");
     scanf("%d", &p.technique.recharge_max);
@@ -139,21 +148,25 @@ void ajouter_personnage(const char* personnages) {
         printf("erreur,reessayez\n");
         scanf("%d",&p.technique.recharge_max);
     }
+    vider();
     p.technique.recharge_restante = p.technique.recharge_max;
+    p.tours_effet_restant=0;
 
 
 
 
-    fprintf(file, "%s %d %d %1f %1f %1f %1f %1f %1f %s %d %s %d %d %s %s %.1f %s %s %d %d %d\n",
+    fprintf(file, "%s %d %d %1f %1f %1f %1f %1f %1f %s %d %s %d %d %s %s %.1f %s %s %d %d %d %d\n",
             p.nom, p.pvc, p.pvm, p.def, p.defmax, p.agl,
             p.vitess, p.vitessmax, p.barre_action,
             p.att[0].nom, p.att[0].degats, p.att[1].nom, p.att[1].degats,
             p.type, p.technique.nom, p.technique.description, p.technique.valeur,
             p.technique.propriete, p.technique.operation,
-            p.technique.tours_actifs, p.technique.recharge_max,p.technique.recharge_restante);
+            p.technique.tours_actifs, p.technique.recharge_max,p.technique.recharge_restante,p.tours_effet_restant);
 
     fclose(file);
     printf("Personnage ajouté avec succès !\n");
+    printf("appuyez sur entrée pour revenir au menu!\n");
+    getchar();
 }
 
 
