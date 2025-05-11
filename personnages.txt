@@ -1,8 +1,8 @@
-sedarp 400 400 20 20 20 4 4 0 Marteau_écrasant 40 Ruée 30 0 Mur_d_acier doubble_la_defense_pendant_2_tours 2.0 def mul 2 1 1 0
+sedarp 400 400 20 20 20 4 4 0 Marteau_écrasant 40 Ruée 55 0 Mur_d_acier doubble_la_defense_pendant_2_tours 2.0 def mul 2 1 1 0
 cleo 420 420 25 25 20 3.5 3.5 0 Coup_de_lame 50 Provocation 40 0 Renforcement Augmente_la_défense_de_50%_pendant_3_tours 1.5 def mul 3 2 2 0
 Ombrenoire 260 260 5 5 40 11 11 0 Lame_fantôme 60 Coup_critique 80 1 Danse_de_l_ombre Double_la_vitesse_pendant_1_tour 2.0 vitess mul 1 2 2 0
 Dacam 280 280 8 8 40 13 13 0 Morsure_toxique 70 paroles_empoisonnées 55 1 Venin_mortel Réduit_les_PV_de_l'ennemi_de_20_pendant_3_tours 20 pvc sub 3 2 2 0
-guérisseuse 300 300 10 10 15 5.5 5.5 0 Frappe_lumineuse 30 Onde_curative 20 2 Lumière_divine Rend_60_PV_immédiatement 60.0 pvc add 0 1 1 0
-Sérénia 310 310 12 12 10 5 5 0 Souffle_apaisant 25 Chant_de_paix 20 2 Bénédiction Augmente_la_vitesse_de_30% directement 1.3 vitess mul 0 3 3 0
+guérisseuse 300 300 10 10 15 5.5 5.5 0 Frappe_lumineuse 50 Onde_curative 60 2 Lumière_divine Rend_60_PV_immédiatement 60.0 pvc add 0 1 1 0
+Sérénia 310 310 12 12 10 5 5 0 Souffle_apaisant 47 Chant_de_paix 57 2 Bénédiction Augmente_la_vitesse_de_30% directement 1.3 vitess mul 0 3 3 0
 
 
