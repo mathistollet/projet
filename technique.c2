@@ -1,5 +1,5 @@
 #include "projet.h"
-
+// Fonction qui applique une technique spéciale à un champion
 void utiliserTechnique(Champion *utilisateur, Champion *cible) {
     Technique *tech = &utilisateur->technique;
 
