@@ -1,3 +1,7 @@
+#include"projet.h"
+
+
+
 void utiliserTechnique(Champion *utilisateur, Champion *cible) {
     Technique *tech = &utilisateur->technique;
 
