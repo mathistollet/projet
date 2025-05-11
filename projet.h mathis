@@ -66,6 +66,8 @@ void vider();
 void printCouleur(const char *texte, const char *couleur);
 int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, int max);
 int lireEntier(int *valeur);
+int lirefloat(float *valeur);
+int liretype(type *valeur);
 void afficherChampion( Champion* c, int index);
 int estDejaChoisi(Champion* equipes, int taille, Champion* candidat);
 void afficherBarreDeVie(int pvact, int pvmax);
