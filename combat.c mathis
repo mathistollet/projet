@@ -78,7 +78,7 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 }
                 printf("\n");
                 printf("appuyer sur entrer pour passer...\n");
-                viderBuffer();
+                vider();
                 getchar();
 
             }
@@ -122,7 +122,7 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 printf("\n");
                 printf("appuyer sur entrer pour passer...\n");
 
-                viderBuffer();
+                vider();
                 getchar();
                 
 
