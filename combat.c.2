@@ -123,13 +123,15 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 printf("\n");
 
                 for(int k=0;k<3;k++){
-                    afficherVie(equipe1[k]);
-                    printf(" ");
-                    if (equipe1[k].tours_effet_restant!=0 ){
-                        printf("effet restant encore %d tour",equipe1[k].tours_effet_restant);
-                    }
+                    if (equipe1[k].pvc>0) {
+                        afficherVie(equipe1[k]);
+                        printf(" ");
+                        if (equipe1[k].tours_effet_restant!=0 ){
+                            printf("effet restant encore %d tour",equipe1[k].tours_effet_restant);
+                        }
 
-                    printf("\n");
+                        printf("\n");
+                    }
                 }
 
                 printf("\n");
@@ -141,13 +143,15 @@ void combat3v3(Champion* tousLesChampions, int nbChampions,Champion* equipe1,Cha
                 printCouleur(nomEquipe2, "\033[0;31m");
                 printf("\n ");
                 for(int k=0;k<3;k++){
-                    afficherVie(equipe2[k]);
-                    printf(" ");
-                    if (equipe2[k].tours_effet_restant!=0 ){
-                        printf("effet restant encore %d tour",equipe2[k].tours_effet_restant);
-                    }
+                    if (equipe2[k].pvc>0) {
+                        afficherVie(equipe2[k]);
+                        printf(" ");
+                        if (equipe2[k].tours_effet_restant!=0 ){
+                            printf("effet restant encore %d tour",equipe2[k].tours_effet_restant);
+                        }
 
-                    printf("\n");
+                        printf("\n");
+                    }
                 }
                 printf("\n");
                 printf("appuyez deux fois  sur entrer pour passer...\n");
@@ -218,9 +222,9 @@ void combat(Champion* perso1, Champion* perso2) {
         printf("\n");
 
         while (!lireEntier(&choix)){
-        printf("Entrée invalide, veuillez entrer un nombre.\n");
-        printf("\nQui voulez-vous cibler ?\n");
-    }
+            printf("Entrée invalide, veuillez entrer un nombre.\n");
+            printf("\nQui voulez-vous cibler ?\n");
+        }
 
         printf("\n");
 
