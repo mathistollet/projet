@@ -1,5 +1,6 @@
 #include "projet.h"
 
+// Ajoute un nouveau personnage dans le fichier "personnages.txt" après avoir collecté ses informations via des entrées utilisateur
 void ajouter_personnage(const char* personnages) {
     FILE *file = fopen("personnages.txt", "a+");
     if (file == NULL) {
@@ -9,6 +10,7 @@ void ajouter_personnage(const char* personnages) {
 
     Champion p;
 
+    // Collecte des informations de base sur le personnage (nom, PV, défense, agilité, etc.)
     printf("Nom : ");
     scanf("%s", p.nom);
     vider();
@@ -36,6 +38,7 @@ void ajouter_personnage(const char* personnages) {
     p.vitessmax = p.vitess;
     p.barre_action = 0;
 
+    // Collecte de l'agilité et des informations sur les attaques
     printf("Agilité (entre 0 et 80) : ");
     while (!lirefloat(&p.agl) || p.agl <= 0 || p.agl > 80) {
         printf("Entrée invalide, veuillez entrer un nombre entre 0 et 80.\n");
@@ -62,6 +65,7 @@ void ajouter_personnage(const char* personnages) {
         printf("Dégâts attaque 2 (entre 0 et 500) : ");
     }
 
+    // Collecte des informations sur le rôle, la technique spéciale et ses caractéristiques
     printf("Rôle (tank=0 / assassin=1 / soutien=2) : ");
     while (!liretype(&p.type) || (p.type != 0 && p.type != 1 && p.type != 2)) {
         printf("Erreur, réessayez.\n");
@@ -118,6 +122,7 @@ void ajouter_personnage(const char* personnages) {
     p.technique.recharge_restante = p.technique.recharge_max;
     p.tours_effet_restant = 0;
 
+    // Sauvegarde des informations du personnage dans le fichier
     fprintf(file,
             "%s %d %d %.1f %.1f %.1f %.1f %.1f %.1f %s %d %s %d %d %s %s %.1f %s %s %d %d %d %d\n",
             p.nom, p.pvc, p.pvm, p.def, p.defmax, p.agl,
@@ -133,6 +138,7 @@ void ajouter_personnage(const char* personnages) {
     printf("Personnage ajouté avec succès !\n");
 }
 
+// Permet à deux équipes de choisir leurs champions parmi une liste
 void selectionnerpersos(Champion *tous_les_champions, int nb_champions, Champion *equipe1, Champion *equipe2, char *nomEquipe1, char *nomEquipe2) {
     printf("=== SELECTION DES EQUIPES ===\n");
     int choix;
@@ -149,6 +155,7 @@ void selectionnerpersos(Champion *tous_les_champions, int nb_champions, Champion
             printf("\n");
         }
 
+        // Affiche les champions disponibles
         for (int i = 0; i < nb_champions; i++) {
             if (!estDejaChoisi(equipe1, 3, &tous_les_champions[i]) &&
                 !estDejaChoisi(equipe2, 3, &tous_les_champions[i])) {
@@ -163,6 +170,7 @@ void selectionnerpersos(Champion *tous_les_champions, int nb_champions, Champion
             continue;
         }
 
+        // Vérifie que le choix est valide
         if (choix < 1 || choix > nb_champions ||
             estDejaChoisi(equipe1, 3, &tous_les_champions[choix - 1]) ||
             estDejaChoisi(equipe2, 3, &tous_les_champions[choix - 1])) {
@@ -170,6 +178,7 @@ void selectionnerpersos(Champion *tous_les_champions, int nb_champions, Champion
             continue;
         }
 
+        // Affecte le champion choisi à l'équipe correspondante
         if (totalchoix % 2 == 0) {
             equipe1[totalchoix / 2] = tous_les_champions[choix - 1];
         } else {
@@ -180,6 +189,7 @@ void selectionnerpersos(Champion *tous_les_champions, int nb_champions, Champion
     }
 }
 
+// Charge les champions depuis le fichier "personnages.txt" et les stocke dans un tableau
 int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, int max) {
     FILE *file = fopen("personnages.txt", "r");
     if (file == NULL) {
@@ -212,50 +222,8 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
     return i;
 }
 
+// Lit un entier depuis l'entrée standard
 int lireEntier(int *valeur) {
     char tab[100];
     if (fgets(tab, sizeof(tab), stdin) != NULL) {
-        char *a;
-        *valeur = strtol(tab, &a, 10);
-        if (a == tab || *a != '\n') {
-            return 0;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-float lirefloat(float *valeur) {
-    char tab[100];
-    if (fgets(tab, sizeof(tab), stdin) != NULL) {
-        char *a;
-        *valeur = strtof(tab, &a);
-        if (a == tab || *a != '\n') {
-            return 0;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-Type liretype(Type *valeur) {
-    char tab[100];
-    if (fgets(tab, sizeof(tab), stdin) != NULL) {
-        char *a;
-        *valeur = strtol(tab, &a, 10);
-        if (a == tab || *a != '\n') {
-            return 0;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-int estDejaChoisi(Champion* equipes, int taille, Champion* candidat) {
-    for (int i = 0; i < taille; i++) {
-        if (strcmp(equipes[i].nom, candidat->nom) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
+        char *a
