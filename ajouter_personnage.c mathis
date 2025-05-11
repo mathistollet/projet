@@ -125,7 +125,7 @@ void ajouter_personnage(const char* personnages) {
         scanf("%d", &p.technique.tours_actifs);
     while(p.technique.tours_actifs<0||p.technique.tours_actifs>5){
         printf("erreur,reessayez\n");
-        scanf("%f",&p.technique.tours_actifs);
+        scanf("%d",&p.technique.tours_actifs);
     }
 
         printf("Temps de recharge : ");
@@ -133,7 +133,7 @@ void ajouter_personnage(const char* personnages) {
 
     while(p.technique.recharge_max<=0||p.technique.recharge_max>5){
         printf("erreur,reessayez\n");
-        scanf("%f",&p.technique.recharge_max);
+        scanf("%d",&p.technique.recharge_max);
     }
     p.technique.recharge_restante = p.technique.recharge_max;
 
