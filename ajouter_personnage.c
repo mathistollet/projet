@@ -265,3 +265,13 @@ Type liretype(Type* valeur) {
     }
 return 0;
 }
+
+
+    int estDejaChoisi(Champion* equipes, int taille, Champion* candidat) {
+        for (int i = 0; i < taille; i++) {
+            if (strcmp(equipes[i].nom, candidat->nom) == 0) {
+                return 1;
+            }
+        }
+        return 0;
+    }
