@@ -226,4 +226,42 @@ int chargerChampionsDepuisFichier(const char* personnages, Champion* champions, 
 int lireEntier(int *valeur) {
     char tab[100];
     if (fgets(tab, sizeof(tab), stdin) != NULL) {
-        char *a
+        char *a;
+      *valeur=strtol(tab,&a,10);
+          if(a==tab||*a!='\n'){
+              return 0;  
+          } 
+    return 1;
+    }
+return 0;
+} 
+
+
+
+float lirefloat(float* valeur) {
+    char tab[100];
+    if (fgets(tab, sizeof(tab), stdin) != NULL) {
+        char *a;
+      *valeur=strtol(tab,&a,10);
+          if(a==tab||*a!='\n'){
+              return 0;  
+          } 
+    return 1;
+    }
+return 0;
+}
+
+
+
+Type liretype(Type* valeur) {
+    char tab[100];
+    if (fgets(tab, sizeof(tab), stdin) != NULL) {
+        char *a;
+      *valeur=strtol(tab,&a,10);
+          if(a==tab||*a!='\n'){
+              return 0;  
+          } 
+    return 1;
+    }
+return 0;
+}
